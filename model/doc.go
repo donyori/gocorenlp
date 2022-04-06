@@ -16,16 +16,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package model provides structures for CoreNLP and
-// some functions to manipulate these structures.
+// Package model provides structures for Stanford CoreNLP.
 //
 // To fit different versions of CoreNLP,
 // the structures are organized into subpackages named in the form:
 //  github.com/donyori/gocorenlp/model/vX.Y.Z-abcdefabcdef/pb
-// where vX.Y.Z is the version of CoreNLP,
+// where X.Y.Z is the version of CoreNLP,
 // abcdefabcdef is a 12-character prefix of the commit hash of
 // the retrieved .proto file in the Stanford CoreNLP project,
-// and pb stands for Protocol Buffers (Protobuf).
+// and pb stands for Protocol Buffers (ProtoBuf).
+//
+// Note that never import two or more different versions at the same time;
+// otherwise, a ProtoBuf conflict will occur.
 //
 // The .proto files are edited from "edu.stanford.nlp.pipeline.CoreNLP.proto"
 // in the Stanford CoreNLP project, which can be retrieved from GitHub:
@@ -52,6 +54,7 @@ package model
 // files named "corenlp.pb.go" should be generated in its subpackages.
 // Each "corenlp.pb.go" and its corresponding "corenlp.proto"
 // should be in the same directory.
-
+//
+//go:generate protoc --proto_path=v3.3.0-5ce4cf67846b/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp.proto
 //go:generate protoc --proto_path=v3.6.0-29765338a2e8/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp.proto
 //go:generate protoc --proto_path=v4.4.0-e90f30f13c40/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp.proto

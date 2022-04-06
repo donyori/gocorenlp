@@ -17,9 +17,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package pb provides auto-generated structures for
-// the data set of Stanford CoreNLP 4.4.0.
+// the data set of Stanford CoreNLP 3.3.0.
 //
-// The corresponding commit hash is e90f30f13c40fc00c41f67d48900c8760453c046.
+// The corresponding commit hash is 5ce4cf67846b9b53aef87825c6fcb8bca608b01a.
 package pb
 
 // The following go:generate directive is for
@@ -40,4 +40,4 @@ package pb
 // This command uses the "module=" output mode to verify that
 // the "go_package" defined in "corenlp.proto" is proper.
 //
-//go:generate protoc --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb corenlp.proto
+//go:generate protoc --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model/v3.3.0-5ce4cf67846b/pb corenlp.proto

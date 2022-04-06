@@ -39,5 +39,5 @@ package pb
 //
 // This command uses the "module=" output mode to verify that
 // the "go_package" defined in "corenlp.proto" is proper.
-
+//
 //go:generate protoc --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model/v3.6.0-29765338a2e8/pb corenlp.proto

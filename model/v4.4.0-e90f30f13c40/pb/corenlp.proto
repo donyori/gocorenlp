@@ -7,7 +7,7 @@ option go_package = "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb";
 //
 // This file is edited from "edu.stanford.nlp.pipeline.CoreNLP.proto"
 // retrieved from GitHub:
-// <https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
+// <https://github.com/stanfordnlp/CoreNLP/blob/v4.4.0/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
 // The commit hash at retrieval is e90f30f13c40fc00c41f67d48900c8760453c046.
 //
 // To compile this file to Go, see "doc.go" in this directory.
