@@ -1,4 +1,4 @@
 # gocorenlp
 A Go (Golang) client for Stanford CoreNLP server.
 
-Code will be published soon.
+More code and documentation will be added soon.
