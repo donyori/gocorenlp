@@ -38,27 +38,24 @@ import (
 // Client is an interface representing an HTTP client
 // for the Stanford CoreNLP server.
 type Client interface {
-	// Ready sends a status request to the readiness endpoint (/ready) and
-	// reports whether the target server is ready to accept connections.
+	// Live sends a status request to the liveness endpoint (/live) and
+	// reports any error encountered to check whether the target server
+	// is online.
 	//
-	// It returns false if the server is not ready or any error is encountered.
-	Ready() bool
+	// It returns nil if the server is online.
+	Live() error
 
-	// Annotate sends an annotation request with specified text and annotators.
-	// The annotation result is represented as a CoreNLP document and
-	// written to outDoc.
+	// Ready sends a status request to the readiness endpoint (/ready) and
+	// reports any error encountered to check whether the target server
+	// is ready to accept connections.
 	//
-	// outDoc must be a non-nil pointer to an auto-generated Document
-	// structure, for example:
-	//
-	//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
-	//  ...
-	//  outDoc := new(pb.Document)
-	//  err := Annotate(outDoc, "Hello world!", "tokenize,ssplit,pos")
-	//  ...
-	//
-	// If outDoc is nil or not a pointer to Document,
-	// a runtime error will occur.
+	// It returns nil if the server is ready to accept connections.
+	Ready() error
+
+	// Annotate sends an annotation request with the specified annotators
+	// to annotate the data read from the specified reader.
+	// The annotation result is represented as
+	// a CoreNLP document and stored in outDoc.
 	//
 	// If no annotators are specified,
 	// the client's default annotators will be used.
@@ -68,7 +65,46 @@ type Client interface {
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
 	//  tokenize,ssplit,pos,depparse
-	Annotate(outDoc proto.Message, text string, annotators string) error
+	//
+	// outDoc must be a non-nil pointer to an auto-generated Document
+	// structure, for example:
+	//
+	//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	//  ...
+	//  outDoc := new(pb.Document)
+	//  err := Annotate(reader, "tokenize,ssplit,pos", outDoc)
+	//  ...
+	//
+	// If outDoc is nil or not a pointer to Document,
+	// a runtime error will occur.
+	Annotate(reader io.Reader, annotators string, outDoc proto.Message) error
+
+	// AnnotateString sends an annotation request with
+	// the specified text and annotators.
+	// The annotation result is represented as
+	// a CoreNLP document and stored in outDoc.
+	//
+	// If no annotators are specified,
+	// the client's default annotators will be used.
+	// If the client's annotators are also not specified,
+	// the server's default annotators will be used.
+	//
+	// The annotators are separated by commas (,) in the string without spaces.
+	// For example:
+	//  tokenize,ssplit,pos,depparse
+	//
+	// outDoc must be a non-nil pointer to an auto-generated Document
+	// structure, for example:
+	//
+	//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	//  ...
+	//  outDoc := new(pb.Document)
+	//  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
+	//  ...
+	//
+	// If outDoc is nil or not a pointer to Document,
+	// a runtime error will occur.
+	AnnotateString(text string, annotators string, outDoc proto.Message) error
 }
 
 // Options are the configuration for creating a new client.
@@ -84,7 +120,7 @@ type Options struct {
 	Port uint16
 
 	// StatusPort is the port of the target server to run
-	// the liveliness and readiness server on.
+	// the liveness and readiness server on.
 	// If zero, treat it the same as the main server.
 	//
 	// Default: 0
@@ -118,7 +154,7 @@ type Options struct {
 	Charset string
 
 	// Annotators are the default annotators with the annotation request.
-	// If no annotators are specified with the annotation request in Annotate,
+	// If no annotators are specified with the annotation request,
 	// these annotators will be used.
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
@@ -130,95 +166,19 @@ type Options struct {
 }
 
 // New creates a new Client for the Stanford CoreNLP server
-// with specified options.
+// with the specified options.
 //
 // If opt is nil, it will use default options.
 //
 // Before returning the client, it will test whether the target server is live.
 // If the test fails, it will report an error and return a nil client.
-// Thus, make sure the server is ready and set the appropriate host address
+// Thus, make sure the server is online and set the appropriate host address
 // in opt before calling this function.
 func New(opt *Options) (c Client, err error) {
-	if opt == nil {
-		opt = new(Options)
-	}
-	t := new(clientImpl)
-
-	// Set fields of t (type: clientImpl) according to opt.
-	hostname := strings.TrimSpace(opt.Hostname)
-	if len(hostname) == 0 {
-		hostname = "127.0.0.1"
-	}
-	mp, sp := opt.Port, opt.StatusPort
-	if mp == 0 {
-		mp = 9000
-	}
-	if sp == 0 {
-		sp = mp
-	}
-	if addr, err := netip.ParseAddr(hostname); err == nil {
-		// hostname is an IP address.
-		t.host = netip.AddrPortFrom(addr, mp).String()
-		if sp == mp {
-			t.statusHost = t.host
-		} else {
-			t.statusHost = netip.AddrPortFrom(addr, sp).String()
-		}
-	} else {
-		// hostname is not an IP address, may be a domain name, or invalid.
-		// This step does not validate the host.
-		// So simply join the hostname and port.
-		t.host = hostname + ":" + strconv.FormatUint(uint64(mp), 10)
-		if sp == mp {
-			t.statusHost = t.host
-		} else {
-			t.statusHost = hostname + ":" + strconv.FormatUint(uint64(sp), 10)
-		}
-	}
-	username := strings.TrimSpace(opt.Username)
-	if len(username) > 0 {
-		password := strings.TrimSpace(opt.Password)
-		if len(password) > 0 {
-			t.userinfo = url.UserPassword(username, password)
-		} else {
-			t.userinfo = url.User(username)
-		}
-	}
-	if opt.Timeout > 0 {
-		t.c.Timeout = opt.Timeout
-	}
-	if len(opt.Annotators) > 0 {
-		t.annotators = strings.Join(strings.Fields(opt.Annotators), "") // drop white space
-	}
-	charset := strings.TrimSpace(opt.Charset)
-	if len(charset) == 0 {
-		charset = "utf-8"
-	}
-	t.contentType = "text/plain; charset=" + charset
-
-	// Send a status request to /live.
-	liveUrl := &url.URL{
-		Scheme: "http",
-		User:   t.userinfo,
-		Host:   t.statusHost,
-		Path:   "live",
-	}
-	resp, err := t.c.Get(liveUrl.String())
+	t := newClientImpl(opt)
+	err = t.Live()
 	if err != nil {
-		return nil, errors.AutoWrap(fmt.Errorf("server not live: %v", err))
-	}
-	defer func(body io.ReadCloser) {
-		_ = body.Close() // ignore error
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.AutoNew("server not live: got " + resp.Status)
-	}
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.AutoWrap(fmt.Errorf("server not live: %v", err))
-	}
-	if r := strings.TrimSpace(string(data)); r != "live" {
-		return nil, errors.AutoNew("got " + r + " from " + liveUrl.Redacted() + "; want live")
+		return nil, errors.AutoWrap(err)
 	}
 	return t, nil
 }
@@ -233,11 +193,104 @@ type clientImpl struct {
 	contentType string
 }
 
-// Ready sends a status request to the readiness endpoint (/ready) and
-// reports whether the target server is ready to accept connections.
+// newClientImpl creates a new clientImpl and
+// sets its fields according to the specified options opt.
+func newClientImpl(opt *Options) *clientImpl {
+	if opt == nil {
+		opt = new(Options)
+	}
+	c := new(clientImpl)
+	hostname := strings.TrimSpace(opt.Hostname)
+	if len(hostname) == 0 {
+		hostname = "127.0.0.1"
+	}
+	mp, sp := opt.Port, opt.StatusPort
+	if mp == 0 {
+		mp = 9000
+	}
+	if sp == 0 {
+		sp = mp
+	}
+	if addr, err := netip.ParseAddr(hostname); err == nil {
+		// hostname is an IP address.
+		c.host = netip.AddrPortFrom(addr, mp).String()
+		if sp == mp {
+			c.statusHost = c.host
+		} else {
+			c.statusHost = netip.AddrPortFrom(addr, sp).String()
+		}
+	} else {
+		// hostname is not an IP address, may be a domain name, or invalid.
+		// This step does not validate the host.
+		// So simply join the hostname and port.
+		c.host = hostname + ":" + strconv.FormatUint(uint64(mp), 10)
+		if sp == mp {
+			c.statusHost = c.host
+		} else {
+			c.statusHost = hostname + ":" + strconv.FormatUint(uint64(sp), 10)
+		}
+	}
+	username := strings.TrimSpace(opt.Username)
+	if len(username) > 0 {
+		password := strings.TrimSpace(opt.Password)
+		if len(password) > 0 {
+			c.userinfo = url.UserPassword(username, password)
+		} else {
+			c.userinfo = url.User(username)
+		}
+	}
+	if opt.Timeout > 0 {
+		c.c.Timeout = opt.Timeout
+	}
+	if len(opt.Annotators) > 0 {
+		c.annotators = strings.Join(strings.Fields(opt.Annotators), "") // drop white space
+	}
+	charset := strings.TrimSpace(opt.Charset)
+	if len(charset) == 0 {
+		charset = "utf-8"
+	}
+	c.contentType = "application/x-www-form-urlencoded; charset=" + charset
+	return c
+}
+
+// Live sends a status request to the liveness endpoint (/live) and
+// reports any error encountered to check whether the target server
+// is online.
 //
-// It returns false if the server is not ready or any error is encountered.
-func (c *clientImpl) Ready() bool {
+// It returns nil if the server is online.
+func (c *clientImpl) Live() error {
+	liveUrl := &url.URL{
+		Scheme: "http",
+		User:   c.userinfo,
+		Host:   c.statusHost,
+		Path:   "live",
+	}
+	resp, err := c.c.Get(liveUrl.String())
+	if err != nil {
+		return errors.AutoWrap(err)
+	}
+	defer func(body io.ReadCloser) {
+		_ = body.Close() // ignore error
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return errors.AutoNew("got response status " + resp.Status)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return errors.AutoWrap(err)
+	}
+	if body := strings.TrimSpace(string(data)); body != "live" {
+		return errors.AutoNew(fmt.Sprintf("got response %s; want live", body))
+	}
+	return nil
+}
+
+// Ready sends a status request to the readiness endpoint (/ready) and
+// reports any error encountered to check whether the target server
+// is ready to accept connections.
+//
+// It returns nil if the server is ready to accept connections.
+func (c *clientImpl) Ready() error {
 	readyUrl := &url.URL{
 		Scheme: "http",
 		User:   c.userinfo,
@@ -246,36 +299,28 @@ func (c *clientImpl) Ready() bool {
 	}
 	resp, err := c.c.Get(readyUrl.String())
 	if err != nil {
-		return false
+		return errors.AutoWrap(err)
 	}
 	defer func(body io.ReadCloser) {
 		_ = body.Close() // ignore error
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		return false
+		return errors.AutoNew("got response status " + resp.Status)
 	}
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return false
+		return errors.AutoWrap(err)
 	}
-	return strings.TrimSpace(string(data)) == "ready"
+	if body := strings.TrimSpace(string(data)); body != "ready" {
+		return errors.AutoNew(fmt.Sprintf("got response %s; want ready", body))
+	}
+	return nil
 }
 
-// Annotate sends an annotation request with specified text and annotators.
-// The annotation result is represented as a CoreNLP document and
-// written to outDoc.
-//
-// outDoc must be a non-nil pointer to an auto-generated Document
-// structure, for example:
-//
-//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
-//  ...
-//  outDoc := new(pb.Document)
-//  err := Annotate(outDoc, "Hello world!", "tokenize,ssplit,pos")
-//  ...
-//
-// If outDoc is nil or not a pointer to Document,
-// a runtime error will occur.
+// Annotate sends an annotation request with the specified annotators
+// to annotate the data read from the specified reader.
+// The annotation result is represented as
+// a CoreNLP document and stored in outDoc.
 //
 // If no annotators are specified,
 // the client's default annotators will be used.
@@ -285,7 +330,19 @@ func (c *clientImpl) Ready() bool {
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
 //  tokenize,ssplit,pos,depparse
-func (c *clientImpl) Annotate(outDoc proto.Message, text string, annotators string) error {
+//
+// outDoc must be a non-nil pointer to an auto-generated Document
+// structure, for example:
+//
+//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+//  ...
+//  outDoc := new(pb.Document)
+//  err := Annotate(reader, "tokenize,ssplit,pos", outDoc)
+//  ...
+//
+// If outDoc is nil or not a pointer to Document,
+// a runtime error will occur.
+func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.Message) error {
 	// Make request.
 	ann := strings.Join(strings.Fields(annotators), "") // drop white space
 	if len(ann) == 0 {
@@ -311,7 +368,7 @@ func (c *clientImpl) Annotate(outDoc proto.Message, text string, annotators stri
 	}
 
 	// Send request and read response.
-	resp, err := c.c.Post(annUrl.String(), c.contentType, strings.NewReader(text))
+	resp, err := c.c.Post(annUrl.String(), c.contentType, reader)
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
@@ -332,6 +389,39 @@ func (c *clientImpl) Annotate(outDoc proto.Message, text string, annotators stri
 		return errors.AutoWrap(protowire.ParseError(n))
 	}
 	err = proto.Unmarshal(v, outDoc)
+	if err != nil {
+		return errors.AutoWrap(err)
+	}
+	return nil
+}
+
+// AnnotateString sends an annotation request with
+// the specified text and annotators.
+// The annotation result is represented as
+// a CoreNLP document and stored in outDoc.
+//
+// If no annotators are specified,
+// the client's default annotators will be used.
+// If the client's annotators are also not specified,
+// the server's default annotators will be used.
+//
+// The annotators are separated by commas (,) in the string without spaces.
+// For example:
+//  tokenize,ssplit,pos,depparse
+//
+// outDoc must be a non-nil pointer to an auto-generated Document
+// structure, for example:
+//
+//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+//  ...
+//  outDoc := new(pb.Document)
+//  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
+//  ...
+//
+// If outDoc is nil or not a pointer to Document,
+// a runtime error will occur.
+func (c *clientImpl) AnnotateString(text string, annotators string, outDoc proto.Message) error {
+	err := errors.AutoWrap(c.Annotate(strings.NewReader(text), annotators, outDoc))
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
