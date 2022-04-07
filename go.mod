@@ -1,5 +1,8 @@
 module github.com/donyori/gocorenlp
 
-go 1.18
+go 1.17
 
-require google.golang.org/protobuf v1.28.0
+require (
+	github.com/donyori/gogo v0.4.0
+	google.golang.org/protobuf v1.28.0
+)

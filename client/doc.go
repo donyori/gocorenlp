@@ -18,5 +18,5 @@
 
 // Package client provides an HTTP client for the Stanford CoreNLP server.
 //
-// The user should start with the function New to get the client.
+// The user can start with the function New to get the client.
 package client
