@@ -108,19 +108,19 @@ type Client interface {
 	// a runtime error will occur.
 	AnnotateString(text string, annotators string, outDoc proto.Message) error
 
-	// Shutdown finds the shutdown key and then sends a shutdown request
+	// Shutdown sends a shutdown request with the specified key
 	// to stop the target server.
 	//
-	// It works only if the target server is local.
-	//
-	// It returns nil if the server has been stopped successfully.
-	Shutdown() error
+	// It returns nil if the server has been shut down successfully.
+	Shutdown(key string) error
 
-	// ShutdownWithKey sends a shutdown request with the specified key
-	// to stop the target server.
+	// ShutdownLocal finds the shutdown key and then sends
+	// a shutdown request to stop the target server.
 	//
-	// It returns nil if the server has been stopped successfully.
-	ShutdownWithKey(key string) error
+	// It works only if the target server is on the local.
+	//
+	// It returns nil if the server has been shut down successfully.
+	ShutdownLocal() error
 
 	// private prevents others from implementing this interface,
 	// so future additions to it will not violate compatibility.
@@ -428,34 +428,11 @@ func (c *clientImpl) AnnotateString(text string, annotators string, outDoc proto
 	return nil
 }
 
-// Shutdown finds the shutdown key and then sends a shutdown request
+// Shutdown sends a shutdown request with the specified key
 // to stop the target server.
 //
-// It works only if the target server is local.
-//
-// It returns nil if the server has been stopped successfully.
-func (c *clientImpl) Shutdown() error {
-	tmpDir := os.TempDir()
-	name := filepath.Join(tmpDir, "corenlp.shutdown")
-	if len(c.serverId) > 0 {
-		name += "." + c.serverId
-	}
-	key, err := os.ReadFile(name)
-	if err != nil {
-		return errors.AutoWrap(fmt.Errorf("failed to find the key: %v", err))
-	}
-	err = c.ShutdownWithKey(string(key))
-	if err != nil {
-		return errors.AutoWrap(err)
-	}
-	return nil
-}
-
-// ShutdownWithKey sends a shutdown request with the specified key
-// to stop the target server.
-//
-// It returns nil if the server has been stopped successfully.
-func (c *clientImpl) ShutdownWithKey(key string) error {
+// It returns nil if the server has been shut down successfully.
+func (c *clientImpl) Shutdown(key string) error {
 	qv := url.Values{"key": []string{key}}
 	shutdownUrl := &url.URL{
 		Scheme:   "http",
@@ -478,6 +455,29 @@ func (c *clientImpl) ShutdownWithKey(key string) error {
 	}
 	if body := strings.TrimSpace(string(data)); body != "Shutdown successful!" {
 		return errors.AutoNew(fmt.Sprintf("got response %s; want Shutdown successful!", body))
+	}
+	return nil
+}
+
+// ShutdownLocal finds the shutdown key and then sends
+// a shutdown request to stop the target server.
+//
+// It works only if the target server is on the local.
+//
+// It returns nil if the server has been shut down successfully.
+func (c *clientImpl) ShutdownLocal() error {
+	tmpDir := os.TempDir()
+	name := filepath.Join(tmpDir, "corenlp.shutdown")
+	if len(c.serverId) > 0 {
+		name += "." + c.serverId
+	}
+	key, err := os.ReadFile(name)
+	if err != nil {
+		return errors.AutoWrap(fmt.Errorf("failed to find the key: %v", err))
+	}
+	err = c.Shutdown(string(key))
+	if err != nil {
+		return errors.AutoWrap(err)
 	}
 	return nil
 }
