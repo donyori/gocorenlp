@@ -1,14 +1,36 @@
+// gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
+// Copyright (C) 2022  Yuan Gao
+//
+// This file is part of gocorenlp.
+//
+// gocorenlp is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+//
+// This file defines the ProtoBuf messages used by Stanford CoreNLP.
+//
+
 syntax = "proto2";
 
-package edu.stanford.nlp.pipeline;
+package com.github.donyori.gocorenlp.model.v4_4_0_e90f30f13c40;
 
-option go_package = "github.com/donyori/gocorenlp/model/v3.6.0-29765338a2e8/pb";
+option go_package = "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb";
 
 //
 // This file is edited from "edu.stanford.nlp.pipeline.CoreNLP.proto"
 // retrieved from GitHub:
-// <https://github.com/stanfordnlp/CoreNLP/blob/v3.6.0/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
-// The commit hash at retrieval is 29765338a2e8d82fc8cef5b34a5cf56a69b0669f.
+// <https://github.com/stanfordnlp/CoreNLP/blob/v4.4.0/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
+// The commit hash at retrieval is e90f30f13c40fc00c41f67d48900c8760453c046.
 //
 // To compile this file to Go, see "doc.go" in this directory.
 //
@@ -27,6 +49,7 @@ enum Language {
   Hebrew   = 7;
   Spanish  = 8;
   UniversalEnglish = 9;
+  UniversalChinese = 10;
 }
 
 //
@@ -37,14 +60,36 @@ message Document {
   repeated Sentence   sentence    = 2;
   repeated CorefChain corefChain  = 3;
   optional string     docID       = 4;
+  optional string     docDate     = 7;
+  optional uint64     calendar    = 8;
 
   /**
    * A peculiar field, for the corner case when a Document is
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
+  repeated Token      character = 10;
 
   repeated Quote      quote = 6;
+
+  /**
+   * This field is for entity mentions across the document.
+   */
+  repeated NERMention mentions = 9;
+  optional bool hasEntityMentionsAnnotation = 13; // used to differentiate between null and empty list
+
+  /**
+   * xml information
+   */
+  optional bool    xmlDoc = 11;
+  repeated Section sections = 12;
+
+  /** coref mentions for entire document **/
+  repeated Mention         mentionsForCoref                    = 14;
+  optional bool hasCorefMentionAnnotation = 15;
+  optional bool hasCorefAnnotation = 16;
+  repeated int32 corefMentionToEntityMentionMappings = 17;
+  repeated int32 entityMentionToCorefMentionMappings = 18;
 
   extensions 100 to 255;
 }
@@ -71,10 +116,16 @@ message Sentence {
   repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
   repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
+  repeated SentenceFragment entailedClause                      = 35;   // The entailed clauses, by natural logic
+  optional DependencyGraph  enhancedDependencies                = 17;
+  optional DependencyGraph  enhancedPlusPlusDependencies        = 18;
+  repeated Token            character                           = 19;
+
   optional uint32           paragraph                           = 11;
 
   optional string           text                                = 12;   // Only needed if we're only saving the sentence.
 
+  optional uint32           lineNumber                          = 20;
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
@@ -86,6 +137,26 @@ message Sentence {
   optional bool            hasCorefMentionsAnnotation          = 57;
 
   optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
+  optional string          sectionDate                         = 59;  // date of section
+  optional uint32          sectionIndex                        = 60;  // section index for this sentence's section
+  optional string          sectionName                         = 61;  // name of section
+  optional string          sectionAuthor                       = 62;  // author of section
+  optional string          docID                               = 63;  // doc id
+  optional bool            sectionQuoted                       = 64;  // is this sentence in an xml quote in a post
+
+  optional bool            hasEntityMentionsAnnotation         = 65;  // check if there are entity mentions
+  optional bool            hasKBPTriplesAnnotation             = 68;  // check if there are KBP triples
+  optional bool            hasOpenieTriplesAnnotation          = 69;  // check if there are OpenIE triples
+
+  // quote stuff
+  optional uint32             chapterIndex                     = 66;
+  optional uint32             paragraphIndex                   = 67;
+  // the quote annotator can soometimes add merged sentences
+  optional Sentence           enhancedSentence                 = 70;
+
+  // speaker stuff
+  optional string          speaker                             = 71;  // The speaker speaking this sentence
+  optional string          speakerType                         = 72;  // The type of speaker speaking this sentence
 
   extensions 100 to 255;
 }
@@ -95,7 +166,7 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  required string word              = 1;    // the word's gloss (post-tokenization)
+  optional string word              = 1;    // the word's gloss (post-tokenization)
   optional string pos               = 2;    // The word's part of speech tag
   optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
   optional string category          = 4;    // The word's 'category' (e.g., parse tree node)
@@ -103,12 +174,16 @@ message Token {
   optional string after             = 6;    // The whitespace/xml after the token
   optional string originalText      = 7;    // The original text for this token
   optional string ner               = 8;    // The word's NER tag
+  optional string coarseNER         = 62;   // The word's coarse NER tag
+  optional string fineGrainedNER    = 63;   // The word's fine-grained NER tag
+  repeated string nerLabelProbs     = 66;   // listing of probs
   optional string normalizedNER     = 9;    // The word's normalized NER tag
   optional string lemma             = 10;   // The word's lemma
   optional uint32 beginChar         = 11;   // The character offset begin, in the document
   optional uint32 endChar           = 12;   // The character offset end, in the document
   optional uint32 utterance         = 13;   // The utterance tag used in dcoref
   optional string speaker           = 14;   // The speaker speaking this word
+  optional string speakerType       = 77;   // The type of speaker speaking this word
   optional uint32 beginIndex        = 15;   // The begin index of, e.g., a span
   optional uint32 endIndex          = 16;   // The begin index of, e.g., a span
   optional uint32 tokenBeginIndex   = 17;   // The begin index of the token
@@ -122,6 +197,7 @@ message Token {
   optional uint32    headWordIndex  = 26;   // The index of the head word of this word.
   optional Operator  operator       = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
   optional Polarity  polarity       = 28;   // The polarity of this word, according to Natural Logic
+  optional string    polarity_dir   = 39;   // The polarity of this word, either "up", "down", or "flat"
   optional Span      span           = 29;   // The span of a leaf node of a tree
   optional string    sentiment      = 30;   // The final sentiment of the sentence
   optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
@@ -129,14 +205,50 @@ message Token {
   optional string coarseTag         = 33; //  The coarse POS tag (used to store the UPOS tag)
   optional Span conllUTokenSpan     = 34;
   optional string conllUMisc        = 35;
-  optional MapIntString conllUSecondaryDeps = 36;
+  optional MapStringString conllUSecondaryDeps = 36;
   optional string   wikipediaEntity = 37;
+  optional bool     isNewline = 38;
 
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
   optional string trueCase        = 52;  // true case type of token
   optional string trueCaseText    = 53;  // true case gloss of token
+
+  //  Chinese character info
+  optional string chineseChar     = 54;
+  optional string chineseSeg      = 55;
+  optional string chineseXMLChar  = 60;
+
+  //  Arabic character info
+  optional string arabicSeg       = 76;
+
+  // Section info
+  optional string sectionName     = 56;
+  optional string sectionAuthor   = 57;
+  optional string sectionDate     = 58;
+  optional string sectionEndLabel = 59;
+
+  // French tokens have parents
+  optional string parent          = 61;
+
+  // mention index info
+  repeated uint32 corefMentionIndex = 64;
+  optional uint32 entityMentionIndex = 65;
+
+  // mwt stuff
+  optional bool isMWT = 67;
+  optional bool isFirstMWT = 68;
+  optional string mwtText = 69;
+
+  // number info
+  optional uint64 numericValue = 70;
+  optional string numericType = 71;
+  optional uint64 numericCompositeValue = 72;
+  optional string numericCompositeType = 73;
+
+  optional uint32 codepointOffsetBegin   = 74;
+  optional uint32 codepointOffsetEnd     = 75;
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
@@ -172,6 +284,18 @@ message Quote {
   optional uint32 tokenEnd       = 8;
   optional string docid          = 9;
   optional uint32 index          = 10;
+  optional string author         = 11;
+  optional string mention        = 12;
+  optional uint32 mentionBegin   = 13;
+  optional uint32 mentionEnd     = 14;
+  optional string mentionType    = 15;
+  optional string mentionSieve   = 16;
+  optional string speaker        = 17;
+  optional string speakerSieve   = 18;
+  optional string canonicalMention = 19;
+  optional uint32 canonicalMentionBegin = 20;
+  optional uint32 canonicalMentionEnd = 21;
+  optional DependencyGraph attributionDependencyGraph = 22;
 }
 
 //
@@ -247,16 +371,16 @@ message Mention {
   optional string person               = 6;
   optional uint32 startIndex           = 7;
   optional uint32 endIndex             = 9;
-  optional uint32 headIndex            = 10;
+  optional int32 headIndex             = 10;
   optional string headString           = 11;
   optional string nerString            = 12;
-  optional uint32 originalRef          = 13;
+  optional int32 originalRef           = 13;
   optional int32 goldCorefClusterID    = 14;
   optional int32 corefClusterID        = 15;
-  optional uint32 mentionNum           = 16;
-  optional uint32 sentNum              = 17;
-  optional uint32 utter                = 18;
-  optional uint32 paragraph            = 19;
+  optional int32 mentionNum            = 16;
+  optional int32 sentNum               = 17;
+  optional int32 utter                 = 18;
+  optional int32 paragraph             = 19;
   optional bool isSubject              = 20;
   optional bool isDirectObject         = 21;
   optional bool isIndirectObject       = 22;
@@ -265,7 +389,7 @@ message Mention {
   optional bool generic                = 25;
   optional bool isSingleton            = 26;
   optional bool hasBasicDependency     = 27;
-  optional bool hasCollapsedDependency = 28;
+  optional bool hasEnhancedDepenedncy  = 28;
   optional bool hasContextParseTree    = 29;
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
@@ -289,9 +413,9 @@ message Mention {
 //
 
 message IndexedWord {
-  optional uint32 sentenceNum          = 1;
-  optional uint32 tokenIndex           = 2;
-  optional uint32 docID                = 3;
+  optional  int32 sentenceNum          = 1;
+  optional  int32 tokenIndex           = 2;
+  optional  int32 docID                = 3;
   optional uint32 copyCount            = 4;
 }
 
@@ -415,6 +539,11 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
+  optional string wikipediaEntity               = 8;
+  optional string gender                        = 9;
+  optional uint32 entityMentionIndex            = 10;
+  optional uint32 canonicalEntityMentionIndex   = 11;
+  optional string entityMentionText             = 12;
 }
 
 //
@@ -428,6 +557,18 @@ message SentenceFragment {
   optional double score          = 4;
 }
 
+
+//
+// The index of a token in a document, including the sentence
+// index and the offset.
+//
+message TokenLocation {
+ optional uint32 sentenceIndex = 1;
+ optional uint32 tokenIndex    = 2;
+
+}
+
+
 //
 // An OpenIE relation triple.
 // Created by the openie annotator.
@@ -437,9 +578,9 @@ message RelationTriple {
   optional string          relation       = 2;   // The surface form of the relation (required)
   optional string          object         = 3;   // The surface form of the object
   optional double          confidence     = 4;   // The [optional] confidence of the extraction
-  repeated uint32          subjectTokens  = 5;   // The tokens comprising the subject of the triple
-  repeated uint32          relationTokens = 6;   // The tokens comprising the relation of the triple
-  repeated uint32          objectTokens   = 7;   // The tokens comprising the object of the triple
+  repeated TokenLocation   subjectTokens  = 13; // The tokens comprising the subject of the triple
+  repeated TokenLocation   relationTokens = 14; // The tokens comprising the relation of the triple
+  repeated TokenLocation   objectTokens   = 15; // The tokens comprising the object of the triple
   optional DependencyGraph tree           = 8;   // The dependency graph fragment for this triple
   optional bool            istmod         = 9;   // If true, this expresses an implicit tmod relation
   optional bool            prefixBe       = 10;  // If true, this relation string is missing a 'be' prefix
@@ -466,3 +607,161 @@ message MapIntString {
   repeated string value = 2;
 }
 
+//
+// Store section info
+//
+
+message Section {
+  required uint32 charBegin         = 1;
+  required uint32 charEnd           = 2;
+  optional string author            = 3;
+  repeated uint32 sentenceIndexes   = 4;
+  optional string datetime          = 5;
+  repeated Quote quotes             = 6;
+  optional uint32 authorCharBegin   = 7;
+  optional uint32 authorCharEnd     = 8;
+  required Token xmlTag             = 9;
+}
+
+
+
+// A message for requesting a semgrex
+// Each sentence stores information about the tokens making up the
+// corresponding graph
+// An alternative would have been to use the existing Document or
+// Sentence classes, but the problem with that is it would be
+// ambiguous which dependency object to use.
+message SemgrexRequest {
+  message Dependencies {
+    repeated Token           token       = 1;
+    required DependencyGraph graph       = 2;
+  }
+
+  repeated string            semgrex     = 1;
+  repeated Dependencies      query       = 2;
+}
+
+// The response from running a semgrex
+// If you pass in M semgrex expressions and N dependency graphs,
+// this returns MxN nested results.  Each SemgrexResult can match
+// multiple times in one graph
+message SemgrexResponse {
+  message NamedNode {
+    required string          name        = 1;
+    required int32           matchIndex  = 2;
+  }
+
+  message NamedRelation {
+    required string          name        = 1;
+    required string          reln        = 2;
+  }
+
+  message Match {
+    required int32           matchIndex  = 1;
+    repeated NamedNode       node        = 2;
+    repeated NamedRelation   reln        = 3;
+  }
+
+  message SemgrexResult {
+    repeated Match           match       = 1;
+  }
+
+  message GraphResult {
+    repeated SemgrexResult   result      = 1;
+  }
+
+  repeated GraphResult       result      = 1;
+}
+
+
+// It's possible to send in a whole document, but we
+// only care about the Sentences and Tokens
+message TokensRegexRequest {
+  required Document          doc         = 1;
+  repeated string            pattern     = 2;
+}
+
+// The result will be a nested structure:
+// repeated PatternMatch, one for each pattern
+// each PatternMatch has a repeated Match,
+// which tells you which sentence matched and where
+message TokensRegexResponse {
+  message MatchLocation {
+    optional string          text        = 1;
+    optional int32           begin       = 2;
+    optional int32           end         = 3;
+  }
+
+  message Match {
+    required int32           sentence    = 1;
+    required MatchLocation   match       = 2;
+    repeated MatchLocation   group       = 3;
+  }
+
+  message PatternMatch {
+    repeated Match           match       = 1;
+  }
+
+  repeated PatternMatch      match       = 1;
+}
+
+// A protobuf which allows to pass in a document with basic
+// dependencies to be converted to enhanced
+message DependencyEnhancerRequest {
+  required Document          document           = 1;
+
+  oneof ref {
+    Language          language           = 2;
+    // The expected value of this is a regex which matches relative pronouns
+    string            relativePronouns   = 3;
+  }
+}
+
+// A version of ParseTree with a flattened structure so that deep trees
+// don't exceed the protobuf stack depth
+message FlattenedParseTree {
+  message Node {
+    oneof contents {
+      bool              openNode           = 1;
+      bool              closeNode          = 2;
+      string            value              = 3;
+    }
+
+    optional double     score              = 4;
+  }
+
+  repeated Node         nodes              = 1;
+}
+
+// A protobuf for calling the java constituency parser evaluator from elsewhere
+message EvaluateParserRequest {
+  message ParseResult {
+    required FlattenedParseTree         gold           = 1;
+    // repeated so you can send in kbest parses, if your parser handles that
+    // note that this already includes a score field
+    repeated FlattenedParseTree         predicted      = 2;
+  }
+
+  repeated ParseResult         treebank       = 1;
+}
+
+message EvaluateParserResponse {
+  required double              f1             = 1;
+  optional double              kbestF1        = 2;
+}
+
+
+// A protobuf for running Tsurgeon operations on constituency trees
+message TsurgeonRequest {
+  message Operation {
+    required string                tregex         = 1;
+    repeated string                tsurgeon       = 2;
+  }
+  repeated Operation               operations     = 1;
+  repeated FlattenedParseTree      trees          = 2;
+}
+
+// The results of the Tsurgeon operation
+message TsurgeonResponse {
+  repeated FlattenedParseTree      trees          = 1;
+}

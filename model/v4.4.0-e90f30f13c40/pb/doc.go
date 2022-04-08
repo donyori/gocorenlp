@@ -22,8 +22,8 @@
 // The corresponding commit hash is e90f30f13c40fc00c41f67d48900c8760453c046.
 package pb
 
-// The following go:generate directive is for
-// compiling the file "corenlp.proto" in this directory.
+// The following go:generate directive is for compiling the file
+// "corenlp_v4_4_0_e90f30f13c40.proto" in this directory.
 //
 // Before running it, make sure that the ProtoBuf compiler "protoc" and
 // its Go plugin "protoc-gen-go" are installed and available in $PATH.
@@ -34,10 +34,16 @@ package pb
 // To install "protoc-gen-go", run the following command:
 //  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 //
-// After running this go:generate directive,
-// a file named "corenlp.pb.go" should be generated in this directory.
+// After running this go:generate directive, a file named
+// "corenlp_v4_4_0_e90f30f13c40.pb.go" should be generated in this directory.
 //
-// This command uses the "module=" output mode to verify that
-// the "go_package" defined in "corenlp.proto" is proper.
+// This command uses the "module=" output mode to verify that the "go_package"
+// defined in "corenlp_v4_4_0_e90f30f13c40.proto" is appropriate.
+// But the "paths=source_relative" output mode can make the command
+// more concise, as follows:
+//  protoc --go_out=. --go_opt=paths=source_relative corenlp_v4_4_0_e90f30f13c40.proto
 //
-//go:generate protoc --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb corenlp.proto
+// Note that do not use any filename patterns or path patterns (e.g., *.proto).
+// Patterns may cause errors or unexpected behavior on different platforms.
+//
+//go:generate protoc --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb corenlp_v4_4_0_e90f30f13c40.proto

@@ -26,20 +26,22 @@
 // the retrieved .proto file in the Stanford CoreNLP project,
 // and pb stands for Protocol Buffers (ProtoBuf).
 //
-// Note that never import two or more different versions at the same time;
-// otherwise, a ProtoBuf conflict will occur.
-//
 // The .proto files are edited from "edu.stanford.nlp.pipeline.CoreNLP.proto"
 // in the Stanford CoreNLP project, which can be retrieved from GitHub:
 // <https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
+//
+// Each .proto file has a unique name to avoid ProtoBuf file name conflicts.
+// (This conflict might be a bug of protoc-gen-go as the files are in different
+// packages and in different directories, but the conflict still exists.)
+// Although this naming style seems verbose and redundant, it works.
 //
 // The .pb.go files are auto-generated according to
 // the corresponding .proto files. For more information,
 // see <https://developers.google.com/protocol-buffers/docs/gotutorial>.
 package model
 
-// The following go:generate directives are for compiling
-// all the "corenlp.proto" in its subpackages.
+// The following go:generate directives are for compiling all the
+// CoreNLP ProtoBuf files (named like "corenlp_*.proto") in its subpackages.
 //
 // Before running it, make sure that the ProtoBuf compiler "protoc" and
 // its Go plugin "protoc-gen-go" are installed and available in $PATH.
@@ -50,11 +52,17 @@ package model
 // To install "protoc-gen-go", run the following command:
 //  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 //
-// After running these go:generate directives,
-// files named "corenlp.pb.go" should be generated in its subpackages.
-// Each "corenlp.pb.go" and its corresponding "corenlp.proto"
+// After running these go:generate directives, files named like
+// "corenlp_*.pb.go" should be generated in its subpackages.
+// Each "corenlp_*.pb.go" and its corresponding "corenlp_*.proto"
 // should be in the same directory.
 //
-//go:generate protoc --proto_path=v3.3.0-5ce4cf67846b/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp.proto
-//go:generate protoc --proto_path=v3.6.0-29765338a2e8/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp.proto
-//go:generate protoc --proto_path=v4.4.0-e90f30f13c40/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp.proto
+// These commands use the "module=" output mode to verify that
+// the "go_package" defined in "corenlp_*.proto" is appropriate.
+//
+// Note that do not use any filename patterns or path patterns (e.g., *.proto).
+// Patterns may cause errors or unexpected behavior on different platforms.
+//
+//go:generate protoc --proto_path=v3.3.0-5ce4cf67846b/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v3_3_0_5ce4cf67846b.proto
+//go:generate protoc --proto_path=v3.6.0-29765338a2e8/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v3.6.0-29765338a2e8.proto
+//go:generate protoc --proto_path=v4.4.0-e90f30f13c40/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_4_0_e90f30f13c40.proto
