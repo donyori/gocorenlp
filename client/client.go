@@ -25,6 +25,8 @@ import (
 	"net/http"
 	"net/netip"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -105,6 +107,22 @@ type Client interface {
 	// If outDoc is nil or not a pointer to Document,
 	// a runtime error will occur.
 	AnnotateString(text string, annotators string, outDoc proto.Message) error
+
+	// Shutdown finds the shutdown key and then sends a shutdown request
+	// to stop the target server.
+	//
+	// It returns nil if the server has been stopped successfully.
+	Shutdown() error
+
+	// ShutdownWithKey sends a shutdown request with the specified key
+	// to stop the target server.
+	//
+	// It returns nil if the server has been stopped successfully.
+	ShutdownWithKey(key string) error
+
+	// private prevents others from implementing this interface,
+	// so future additions to it will not violate compatibility.
+	private()
 }
 
 // Options are the configuration for creating a new client.
@@ -144,6 +162,8 @@ type Options struct {
 	// Password is the password sent with the request.
 	// Set this along with Username if the target server requires basic auth.
 	//
+	// Only valid when Username is not empty.
+	//
 	// Default: "" (empty)
 	Password string
 
@@ -163,6 +183,14 @@ type Options struct {
 	//
 	// Default: "" (empty, no annotator is specified by default)
 	Annotators string
+
+	// ServerId is the value of the option -server_id used
+	// when starting the target server.
+	//
+	// If the server is started without that option, leave it empty.
+	//
+	// Default: "" (empty)
+	ServerId string
 }
 
 // New creates a new Client for the Stanford CoreNLP server
@@ -191,6 +219,7 @@ type clientImpl struct {
 	userinfo    *url.Userinfo
 	annotators  string
 	contentType string
+	serverId    string
 }
 
 // newClientImpl creates a new clientImpl and
@@ -199,37 +228,8 @@ func newClientImpl(opt *Options) *clientImpl {
 	if opt == nil {
 		opt = new(Options)
 	}
-	c := new(clientImpl)
-	hostname := strings.TrimSpace(opt.Hostname)
-	if len(hostname) == 0 {
-		hostname = "127.0.0.1"
-	}
-	mp, sp := opt.Port, opt.StatusPort
-	if mp == 0 {
-		mp = 9000
-	}
-	if sp == 0 {
-		sp = mp
-	}
-	if addr, err := netip.ParseAddr(hostname); err == nil {
-		// hostname is an IP address.
-		c.host = netip.AddrPortFrom(addr, mp).String()
-		if sp == mp {
-			c.statusHost = c.host
-		} else {
-			c.statusHost = netip.AddrPortFrom(addr, sp).String()
-		}
-	} else {
-		// hostname is not an IP address, may be a domain name, or invalid.
-		// This step does not validate the host.
-		// So simply join the hostname and port.
-		c.host = hostname + ":" + strconv.FormatUint(uint64(mp), 10)
-		if sp == mp {
-			c.statusHost = c.host
-		} else {
-			c.statusHost = hostname + ":" + strconv.FormatUint(uint64(sp), 10)
-		}
-	}
+	c := &clientImpl{serverId: strings.TrimSpace(opt.ServerId)}
+	c.host, c.statusHost = makeHosts(opt.Hostname, opt.Port, opt.StatusPort)
 	username := strings.TrimSpace(opt.Username)
 	if len(username) > 0 {
 		password := strings.TrimSpace(opt.Password)
@@ -249,6 +249,10 @@ func newClientImpl(opt *Options) *clientImpl {
 	if len(charset) == 0 {
 		charset = "utf-8"
 	}
+	// According to the Stanford CoreNLP online documentation
+	// <https://stanfordnlp.github.io/CoreNLP/corenlp-server.html#annotate-with-corenlp->,
+	// the post data should be percent-encoded.
+	// Thus, set the Content-Type header to "application/x-www-form-urlencoded".
 	c.contentType = "application/x-www-form-urlencoded; charset=" + charset
 	return c
 }
@@ -269,9 +273,7 @@ func (c *clientImpl) Live() error {
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer func(body io.ReadCloser) {
-		_ = body.Close() // ignore error
-	}(resp.Body)
+	defer closeIgnoreError(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return errors.AutoNew("got response status " + resp.Status)
 	}
@@ -301,9 +303,7 @@ func (c *clientImpl) Ready() error {
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer func(body io.ReadCloser) {
-		_ = body.Close() // ignore error
-	}(resp.Body)
+	defer closeIgnoreError(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return errors.AutoNew("got response status " + resp.Status)
 	}
@@ -372,9 +372,7 @@ func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer func(body io.ReadCloser) {
-		_ = body.Close() // ignore error
-	}(resp.Body)
+	defer closeIgnoreError(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return errors.AutoNew("got " + resp.Status)
 	}
@@ -426,4 +424,102 @@ func (c *clientImpl) AnnotateString(text string, annotators string, outDoc proto
 		return errors.AutoWrap(err)
 	}
 	return nil
+}
+
+// Shutdown finds the shutdown key and then sends a shutdown request
+// to stop the target server.
+//
+// It returns nil if the server has been stopped successfully.
+func (c *clientImpl) Shutdown() error {
+	tmpDir := os.TempDir()
+	name := filepath.Join(tmpDir, "corenlp.shutdown")
+	if len(c.serverId) > 0 {
+		name += "." + c.serverId
+	}
+	key, err := os.ReadFile(name)
+	if err != nil {
+		return errors.AutoWrap(fmt.Errorf("failed to find the key: %v", err))
+	}
+	err = c.ShutdownWithKey(string(key))
+	if err != nil {
+		return errors.AutoWrap(err)
+	}
+	return nil
+}
+
+// ShutdownWithKey sends a shutdown request with the specified key
+// to stop the target server.
+//
+// It returns nil if the server has been stopped successfully.
+func (c *clientImpl) ShutdownWithKey(key string) error {
+	qv := url.Values{"key": []string{key}}
+	shutdownUrl := &url.URL{
+		Scheme:   "http",
+		User:     c.userinfo,
+		Host:     c.host,
+		Path:     "shutdown",
+		RawQuery: qv.Encode(),
+	}
+	resp, err := c.c.Get(shutdownUrl.String())
+	if err != nil {
+		return errors.AutoWrap(err)
+	}
+	defer closeIgnoreError(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return errors.AutoNew("got response status " + resp.Status)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return errors.AutoWrap(err)
+	}
+	if body := strings.TrimSpace(string(data)); body != "Shutdown successful!" {
+		return errors.AutoNew(fmt.Sprintf("got response %s; want Shutdown successful!", body))
+	}
+	return nil
+}
+
+func (c *clientImpl) private() {}
+
+// closeIgnoreError closes the specified closer if it is non-nil
+// and ignores any error encountered.
+func closeIgnoreError(closer io.Closer) {
+	if closer != nil {
+		_ = closer.Close()
+	}
+}
+
+// makeHosts generates the hosts (including the hostname part and
+// the port number part) for the main server and status server
+// from the specified hostname, port, and statusPort.
+func makeHosts(hostname string, port, statusPort uint16) (host, statusHost string) {
+	hostname = strings.TrimSpace(hostname)
+	if len(hostname) == 0 {
+		hostname = "127.0.0.1"
+	}
+	if port == 0 {
+		port = 9000
+	}
+	if statusPort == 0 {
+		statusPort = port
+	}
+	if addr, err := netip.ParseAddr(hostname); err == nil {
+		// hostname is an IP address.
+		host = netip.AddrPortFrom(addr, port).String()
+		if statusPort == port {
+			statusHost = host
+		} else {
+			statusHost = netip.AddrPortFrom(addr, statusPort).String()
+		}
+	} else {
+		// hostname is not an IP address, may be a domain name, or invalid.
+		// This function does not validate the host.
+		// So simply join the hostname and port.
+		host = hostname + ":" + strconv.FormatUint(uint64(port), 10)
+		if statusPort == port {
+			statusHost = host
+		} else {
+			statusHost = hostname + ":" + strconv.FormatUint(uint64(statusPort), 10)
+		}
+	}
+	return
 }

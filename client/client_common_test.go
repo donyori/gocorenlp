@@ -25,66 +25,54 @@ import (
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
-// Run the following tests with a Stanford CoreNLP 4.4.0 server running and
-// (both the main server and the status server) listening to 127.0.0.1:9000.
+const testText = "The quick brown fox jumped over the lazy dog."
 
-func TestNew(t *testing.T) {
-	c, err := New(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if c == nil {
-		t.Error("got nil client")
-	}
+// testAnnotateFunc encapsulates common code for testing
+// the method Annotate of *clientImpl.
+func testAnnotateFunc(t *testing.T, f func() *clientImpl) {
+	testAnnotateMethodsFunc(t, func(t *testing.T, annotators string) *pb.Document {
+		c := f()
+		reader := strings.NewReader(testText)
+		doc := new(pb.Document)
+		if err := c.Annotate(reader, annotators, doc); err != nil {
+			t.Error(err)
+			return nil
+		}
+		return doc
+	})
 }
 
-func TestClientImpl_Live(t *testing.T) {
-	c := testNewDefaultClientImpl()
-	if err := c.Live(); err != nil {
-		t.Error(err)
-	}
+// testAnnotateStringFunc encapsulates common code for testing
+// the method AnnotateString of *clientImpl.
+func testAnnotateStringFunc(t *testing.T, f func() *clientImpl) {
+	testAnnotateMethodsFunc(t, func(t *testing.T, annotators string) *pb.Document {
+		c := f()
+		doc := new(pb.Document)
+		if err := c.AnnotateString(testText, annotators, doc); err != nil {
+			t.Error(err)
+			return nil
+		}
+		return doc
+	})
 }
 
-func TestClientImpl_Ready(t *testing.T) {
-	c := testNewDefaultClientImpl()
-	if err := c.Ready(); err != nil {
-		t.Error(err)
+// testAnnotateMethodsFunc encapsulates common code for testing
+// the methods Annotate and AnnotateString of *clientImpl.
+func testAnnotateMethodsFunc(t *testing.T, f func(t *testing.T, annotators string) *pb.Document) {
+	testCases := []struct {
+		name       string
+		annotators string
+	}{
+		{"specify annotators", "tokenize,ssplit,pos"},
+		{"omit annotators", ""},
 	}
-}
-
-func TestClientImpl_Annotate(t *testing.T) {
-	const text = "The quick brown fox jumped over the lazy dog."
-	reader := strings.NewReader(text)
-	c := testNewDefaultClientImpl()
-	doc := new(pb.Document)
-	if err := c.Annotate(reader, "tokenize,ssplit,pos", doc); err != nil {
-		t.Fatal(err)
-	}
-	testCheckAnnotation(t, doc)
-}
-
-func TestClientImpl_AnnotateString(t *testing.T) {
-	const text = "The quick brown fox jumped over the lazy dog."
-	c := testNewDefaultClientImpl()
-	doc := new(pb.Document)
-	if err := c.AnnotateString(text, "tokenize,ssplit,pos", doc); err != nil {
-		t.Fatal(err)
-	}
-	testCheckAnnotation(t, doc)
-}
-
-// testNewDefaultClientImpl creates a Client
-// connecting to 127.0.0.1:9000,
-// with no userinfo, no timeout,
-// annotators "tokenize,ssplit,pos",
-// and contentType "application/x-www-form-urlencoded; charset=utf-8".
-func testNewDefaultClientImpl() *clientImpl {
-	return &clientImpl{
-		host:        "127.0.0.1:9000",
-		statusHost:  "127.0.0.1:9000",
-		userinfo:    nil,
-		annotators:  "tokenize,ssplit,pos",
-		contentType: "application/x-www-form-urlencoded; charset=utf-8",
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			doc := f(t, tc.annotators)
+			if doc != nil {
+				testCheckAnnotation(t, doc)
+			}
+		})
 	}
 }
 
@@ -95,14 +83,13 @@ func testNewDefaultClientImpl() *clientImpl {
 // content before token, content after token, and token part-of-speech tag.
 func testCheckAnnotation(t *testing.T, doc *pb.Document) {
 	const nTokens = 10
-	const text = "The quick brown fox jumped over the lazy dog."
 	wordArray := [nTokens]string{"The", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog", "."}
 	beforeArray := [nTokens]string{"", " ", " ", " ", " ", " ", " ", " ", " "}
 	afterArray := [nTokens]string{" ", " ", " ", " ", " ", " ", " ", " "}
 	posArray := [nTokens]string{"DT", "JJ", "JJ", "NN", "VBD", "IN", "DT", "JJ", "NN", "."}
 
-	if txt := doc.GetText(); txt != text {
-		t.Errorf("got doc text %q; want %q", txt, text)
+	if txt := doc.GetText(); txt != testText {
+		t.Errorf("got doc text %q; want %q", txt, testText)
 	}
 
 	sentences := doc.GetSentence()
