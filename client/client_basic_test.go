@@ -22,6 +22,7 @@ import "testing"
 
 // Run the following tests with a Stanford CoreNLP 4.4.0 server running and
 // (both the main server and the status server) listening on 127.0.0.1:9000.
+// The server should use its default language model.
 
 func TestNew_Basic(t *testing.T) {
 	c, err := New(nil)
@@ -55,11 +56,11 @@ func TestClientImpl_AnnotateString_Basic(t *testing.T) {
 	testAnnotateStringFunc(t, testNewBasicClientImpl)
 }
 
-// testNewBasicClientImpl creates a Client
+// testNewBasicClientImpl creates a *clientImpl
 // connecting to 127.0.0.1:9000,
 // with no userinfo, no timeout,
-// annotators "tokenize,ssplit,pos",
-// and contentType "application/x-www-form-urlencoded; charset=utf-8".
+// annotators="tokenize,ssplit,pos",
+// and contentType="application/x-www-form-urlencoded; charset=utf-8".
 func testNewBasicClientImpl() *clientImpl {
 	return newClientImpl(&Options{Annotators: "tokenize,ssplit,pos"})
 }

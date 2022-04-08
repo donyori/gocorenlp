@@ -111,6 +111,8 @@ type Client interface {
 	// Shutdown finds the shutdown key and then sends a shutdown request
 	// to stop the target server.
 	//
+	// It works only if the target server is local.
+	//
 	// It returns nil if the server has been stopped successfully.
 	Shutdown() error
 
@@ -428,6 +430,8 @@ func (c *clientImpl) AnnotateString(text string, annotators string, outDoc proto
 
 // Shutdown finds the shutdown key and then sends a shutdown request
 // to stop the target server.
+//
+// It works only if the target server is local.
 //
 // It returns nil if the server has been stopped successfully.
 func (c *clientImpl) Shutdown() error {

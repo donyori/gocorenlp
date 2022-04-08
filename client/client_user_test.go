@@ -23,6 +23,7 @@ import "testing"
 // Run the following tests with a Stanford CoreNLP 4.4.0 server running and
 // (both the main server and the status server) listening on 127.0.0.1:9200,
 // with username="user1" and password="u1%password".
+// The server should use its default language model.
 
 const testUserPort uint16 = 9200
 const testUserUsername, testUserPassword string = "user1", "u1%password"
@@ -63,13 +64,13 @@ func TestClientImpl_AnnotateString_User(t *testing.T) {
 	testAnnotateStringFunc(t, testNewUserClientImpl)
 }
 
-// testNewUserClientImpl creates a Client
+// testNewUserClientImpl creates a *clientImpl
 // connecting to 127.0.0.1:9200,
-// with username "user1",
-// password "u1%password",
+// with username="user1",
+// password="u1%password",
 // no timeout,
-// annotators "tokenize,ssplit,pos",
-// and contentType "application/x-www-form-urlencoded; charset=utf-8".
+// annotators="tokenize,ssplit,pos",
+// and contentType="application/x-www-form-urlencoded; charset=utf-8".
 func testNewUserClientImpl() *clientImpl {
 	return newClientImpl(&Options{
 		Port:       testUserPort,

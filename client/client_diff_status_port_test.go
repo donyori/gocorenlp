@@ -23,6 +23,7 @@ import "testing"
 // Run the following tests with a Stanford CoreNLP 4.4.0 server running,
 // with the main server listening on 127.0.0.1:9100 and
 // the status server listening on 127.0.0.1:9101.
+// The server should use its default language model.
 
 const testDiffStatusPortPort uint16 = 9100
 
@@ -61,12 +62,12 @@ func TestClientImpl_AnnotateString_DiffStatusPort(t *testing.T) {
 	testAnnotateStringFunc(t, testNewDiffStatusPortClientImpl)
 }
 
-// testNewDiffStatusPortClientImpl creates a Client
+// testNewDiffStatusPortClientImpl creates a *clientImpl
 // connecting to the main server on 127.0.0.1:9100,
 // the status server on 127.0.0.1:9101,
 // with no userinfo, no timeout,
-// annotators "tokenize,ssplit,pos",
-// and contentType "application/x-www-form-urlencoded; charset=utf-8".
+// annotators="tokenize,ssplit,pos",
+// and contentType="application/x-www-form-urlencoded; charset=utf-8".
 func testNewDiffStatusPortClientImpl() *clientImpl {
 	return newClientImpl(&Options{
 		Port:       testDiffStatusPortPort,
