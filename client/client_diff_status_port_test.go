@@ -33,7 +33,8 @@ func TestNew_DiffStatusPort(t *testing.T) {
 		StatusPort: testDiffStatusPortPort + 1,
 	})
 	if err != nil {
-		t.Fatal(err)
+		testLogErrorChain(t, err)
+		return
 	}
 	if c == nil {
 		t.Error("got nil client")
@@ -43,23 +44,19 @@ func TestNew_DiffStatusPort(t *testing.T) {
 func TestClientImpl_Live_DiffStatusPort(t *testing.T) {
 	c := testNewDiffStatusPortClientImpl()
 	if err := c.Live(); err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
 func TestClientImpl_Ready_DiffStatusPort(t *testing.T) {
 	c := testNewDiffStatusPortClientImpl()
 	if err := c.Ready(); err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
 func TestClientImpl_Annotate_DiffStatusPort(t *testing.T) {
 	testAnnotateFunc(t, testNewDiffStatusPortClientImpl)
-}
-
-func TestClientImpl_AnnotateString_DiffStatusPort(t *testing.T) {
-	testAnnotateStringFunc(t, testNewDiffStatusPortClientImpl)
 }
 
 // testNewDiffStatusPortClientImpl creates a *clientImpl

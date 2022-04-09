@@ -35,7 +35,8 @@ func TestNew_User(t *testing.T) {
 		Password: testUserPassword,
 	})
 	if err != nil {
-		t.Fatal(err)
+		testLogErrorChain(t, err)
+		return
 	}
 	if c == nil {
 		t.Error("got nil client")
@@ -45,23 +46,19 @@ func TestNew_User(t *testing.T) {
 func TestClientImpl_Live_User(t *testing.T) {
 	c := testNewUserClientImpl()
 	if err := c.Live(); err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
 func TestClientImpl_Ready_User(t *testing.T) {
 	c := testNewUserClientImpl()
 	if err := c.Ready(); err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
 func TestClientImpl_Annotate_User(t *testing.T) {
 	testAnnotateFunc(t, testNewUserClientImpl)
-}
-
-func TestClientImpl_AnnotateString_User(t *testing.T) {
-	testAnnotateStringFunc(t, testNewUserClientImpl)
 }
 
 // testNewUserClientImpl creates a *clientImpl

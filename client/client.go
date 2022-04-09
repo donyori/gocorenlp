@@ -23,13 +23,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/netip"
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"time"
 
 	"google.golang.org/protobuf/encoding/protowire"
 	"google.golang.org/protobuf/proto"
@@ -127,74 +124,6 @@ type Client interface {
 	private()
 }
 
-// Options are the configuration for creating a new client.
-type Options struct {
-	// Hostname is the host (without port number) of the target server.
-	//
-	// Default: 127.0.0.1
-	Hostname string
-
-	// Port is the port of the target server.
-	//
-	// Default: 9000
-	Port uint16
-
-	// StatusPort is the port of the target server to run
-	// the liveness and readiness server on.
-	// If zero, treat it the same as the main server.
-	//
-	// Default: 0
-	StatusPort uint16
-
-	// Timeout specifies a time limit for requests made by the client.
-	// The timeout includes connection time, any redirects,
-	// and reading the response body.
-	//
-	// A non-positive value means no timeout.
-	//
-	// Default: 0
-	Timeout time.Duration
-
-	// Username is the username sent with the request.
-	// Set this along with Password if the target server requires basic auth.
-	//
-	// Default: "" (empty)
-	Username string
-
-	// Password is the password sent with the request.
-	// Set this along with Username if the target server requires basic auth.
-	//
-	// Only valid when Username is not empty.
-	//
-	// Default: "" (empty)
-	Password string
-
-	// Charset is the character encoding of the request
-	// set in the Content-Type header.
-	//
-	// Default: utf-8
-	Charset string
-
-	// Annotators are the default annotators with the annotation request.
-	// If no annotators are specified with the annotation request,
-	// these annotators will be used.
-	//
-	// The annotators are separated by commas (,) in the string without spaces.
-	// For example:
-	//  tokenize,ssplit,pos,depparse
-	//
-	// Default: "" (empty, no annotator is specified by default)
-	Annotators string
-
-	// ServerId is the value of the option -server_id used
-	// when starting the target server.
-	//
-	// If the server is started without that option, leave it empty.
-	//
-	// Default: "" (empty)
-	ServerId string
-}
-
 // New creates a new Client for the Stanford CoreNLP server
 // with the specified options.
 //
@@ -275,16 +204,14 @@ func (c *clientImpl) Live() error {
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer closeIgnoreError(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return errors.AutoNew("got response status " + resp.Status)
-	}
-	data, err := io.ReadAll(resp.Body)
+	_, err = checkResponse(
+		resp,
+		nil,
+		makeAcceptBodyEqualTrimSpace("live"),
+		"live",
+	)
 	if err != nil {
 		return errors.AutoWrap(err)
-	}
-	if body := strings.TrimSpace(string(data)); body != "live" {
-		return errors.AutoNew(fmt.Sprintf("got response %s; want live", body))
 	}
 	return nil
 }
@@ -305,16 +232,14 @@ func (c *clientImpl) Ready() error {
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer closeIgnoreError(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return errors.AutoNew("got response status " + resp.Status)
-	}
-	data, err := io.ReadAll(resp.Body)
+	_, err = checkResponse(
+		resp,
+		nil,
+		makeAcceptBodyEqualTrimSpace("ready"),
+		"ready",
+	)
 	if err != nil {
 		return errors.AutoWrap(err)
-	}
-	if body := strings.TrimSpace(string(data)); body != "ready" {
-		return errors.AutoNew(fmt.Sprintf("got response %s; want ready", body))
 	}
 	return nil
 }
@@ -345,7 +270,7 @@ func (c *clientImpl) Ready() error {
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
 func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.Message) error {
-	// Make request.
+	// Make request URL.
 	ann := strings.Join(strings.Fields(annotators), "") // drop white space
 	if len(ann) == 0 {
 		ann = c.annotators
@@ -374,11 +299,7 @@ func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer closeIgnoreError(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return errors.AutoNew("got " + resp.Status)
-	}
-	data, err := io.ReadAll(resp.Body)
+	data, err := checkResponse(resp, nil, nil, "")
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
@@ -386,11 +307,19 @@ func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.
 	// Parse ProtoBuf message.
 	v, n := protowire.ConsumeBytes(data)
 	if n < 0 {
-		return errors.AutoWrap(protowire.ParseError(n))
+		return errors.AutoWrap(NewProtoBufError(
+			"google.golang.org/protobuf/encoding/protowire.ConsumeBytes",
+			data,
+			err,
+		))
 	}
 	err = proto.Unmarshal(v, outDoc)
 	if err != nil {
-		return errors.AutoWrap(err)
+		return errors.AutoWrap(NewProtoBufError(
+			"google.golang.org/protobuf/proto.Unmarshal",
+			outDoc,
+			err,
+		))
 	}
 	return nil
 }
@@ -445,16 +374,15 @@ func (c *clientImpl) Shutdown(key string) error {
 	if err != nil {
 		return errors.AutoWrap(err)
 	}
-	defer closeIgnoreError(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return errors.AutoNew("got response status " + resp.Status)
-	}
-	data, err := io.ReadAll(resp.Body)
+	wantBody := "Shutdown successful!"
+	_, err = checkResponse(
+		resp,
+		nil,
+		makeAcceptBodyEqualTrimSpace(wantBody),
+		wantBody,
+	)
 	if err != nil {
 		return errors.AutoWrap(err)
-	}
-	if body := strings.TrimSpace(string(data)); body != "Shutdown successful!" {
-		return errors.AutoNew(fmt.Sprintf("got response %s; want Shutdown successful!", body))
 	}
 	return nil
 }
@@ -483,47 +411,3 @@ func (c *clientImpl) ShutdownLocal() error {
 }
 
 func (c *clientImpl) private() {}
-
-// closeIgnoreError closes the specified closer if it is non-nil
-// and ignores any error encountered.
-func closeIgnoreError(closer io.Closer) {
-	if closer != nil {
-		_ = closer.Close()
-	}
-}
-
-// makeHosts generates the hosts (including the hostname part and
-// the port number part) for the main server and status server
-// from the specified hostname, port, and statusPort.
-func makeHosts(hostname string, port, statusPort uint16) (host, statusHost string) {
-	hostname = strings.TrimSpace(hostname)
-	if len(hostname) == 0 {
-		hostname = "127.0.0.1"
-	}
-	if port == 0 {
-		port = 9000
-	}
-	if statusPort == 0 {
-		statusPort = port
-	}
-	if addr, err := netip.ParseAddr(hostname); err == nil {
-		// hostname is an IP address.
-		host = netip.AddrPortFrom(addr, port).String()
-		if statusPort == port {
-			statusHost = host
-		} else {
-			statusHost = netip.AddrPortFrom(addr, statusPort).String()
-		}
-	} else {
-		// hostname is not an IP address, may be a domain name, or invalid.
-		// This function does not validate the host.
-		// So simply join the hostname and port.
-		host = hostname + ":" + strconv.FormatUint(uint64(port), 10)
-		if statusPort == port {
-			statusHost = host
-		} else {
-			statusHost = hostname + ":" + strconv.FormatUint(uint64(statusPort), 10)
-		}
-	}
-	return
-}

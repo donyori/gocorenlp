@@ -27,7 +27,8 @@ import "testing"
 func TestNew_Basic(t *testing.T) {
 	c, err := New(nil)
 	if err != nil {
-		t.Fatal(err)
+		testLogErrorChain(t, err)
+		return
 	}
 	if c == nil {
 		t.Error("got nil client")
@@ -37,14 +38,14 @@ func TestNew_Basic(t *testing.T) {
 func TestClientImpl_Live_Basic(t *testing.T) {
 	c := testNewBasicClientImpl()
 	if err := c.Live(); err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
 func TestClientImpl_Ready_Basic(t *testing.T) {
 	c := testNewBasicClientImpl()
 	if err := c.Ready(); err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 

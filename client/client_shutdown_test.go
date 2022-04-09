@@ -32,7 +32,7 @@ func TestClientImpl_ShutdownLocal_Basic(t *testing.T) {
 	c := newClientImpl(&Options{Port: testShutdownPort})
 	err := c.ShutdownLocal()
 	if err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
@@ -47,7 +47,7 @@ func TestClientImpl_ShutdownLocal_ServerId(t *testing.T) {
 	})
 	err := c.ShutdownLocal()
 	if err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }
 
@@ -62,6 +62,6 @@ func TestClientImpl_ShutdownLocal_DiffStatusPort(t *testing.T) {
 	})
 	err := c.ShutdownLocal()
 	if err != nil {
-		t.Error(err)
+		testLogErrorChain(t, err)
 	}
 }

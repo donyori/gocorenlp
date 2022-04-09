@@ -19,6 +19,8 @@
 package client
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -26,6 +28,18 @@ import (
 )
 
 const testText = "The quick brown fox jumped over the lazy dog."
+
+// testLogErrorChain logs the specified error along
+// its Unwrap chain using tb.Error.
+func testLogErrorChain(tb testing.TB, err error) {
+	var b strings.Builder
+	b.WriteString(err.Error())
+	for innerErr := errors.Unwrap(err); innerErr != nil; innerErr = errors.Unwrap(innerErr) {
+		b.WriteString(";\n\tcaused by ")
+		b.WriteString(innerErr.Error())
+	}
+	tb.Error(b.String())
+}
 
 // testAnnotateFunc encapsulates common code for testing
 // the method Annotate of *clientImpl.
@@ -35,7 +49,7 @@ func testAnnotateFunc(t *testing.T, f func() *clientImpl) {
 		reader := strings.NewReader(testText)
 		doc := new(pb.Document)
 		if err := c.Annotate(reader, annotators, doc); err != nil {
-			t.Error(err)
+			testLogErrorChain(t, err)
 			return nil
 		}
 		return doc
@@ -49,7 +63,7 @@ func testAnnotateStringFunc(t *testing.T, f func() *clientImpl) {
 		c := f()
 		doc := new(pb.Document)
 		if err := c.AnnotateString(testText, annotators, doc); err != nil {
-			t.Error(err)
+			testLogErrorChain(t, err)
 			return nil
 		}
 		return doc
@@ -59,16 +73,10 @@ func testAnnotateStringFunc(t *testing.T, f func() *clientImpl) {
 // testAnnotateMethodsFunc encapsulates common code for testing
 // the methods Annotate and AnnotateString of *clientImpl.
 func testAnnotateMethodsFunc(t *testing.T, f func(t *testing.T, annotators string) *pb.Document) {
-	testCases := []struct {
-		name       string
-		annotators string
-	}{
-		{"specify annotators", "tokenize,ssplit,pos"},
-		{"omit annotators", ""},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			doc := f(t, tc.annotators)
+	annotators := []string{"", "tokenize,ssplit,pos"}
+	for _, ann := range annotators {
+		t.Run(fmt.Sprintf("annotator=%q", ann), func(t *testing.T) {
+			doc := f(t, ann)
 			if doc != nil {
 				testCheckAnnotation(t, doc)
 			}
