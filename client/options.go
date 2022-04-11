@@ -91,6 +91,11 @@ type Options struct {
 	//
 	// Default: "" (empty)
 	ServerId string `json:"serverId,omitempty"`
+
+	// onlyKeyedLiterals forces others to construct Options
+	// only with the keyed literals, so future additions to it
+	// will not violate compatibility.
+	onlyKeyedLiterals struct{}
 }
 
 // makeHosts generates the hosts (including the hostname part and
