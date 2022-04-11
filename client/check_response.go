@@ -22,6 +22,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/donyori/gocorenlp/errors"
 )
 
 // checkResponse checks the specified HTTP response and reads its body.
@@ -44,7 +46,8 @@ import (
 //
 // checkResponse returns the response body, and reports an error
 // if the response is not as expected.
-// If the returned error is non-nil, it is of type *UnacceptableResponseError.
+// If the returned error is non-nil, it is of type
+// *github.com/donyori/gocorenlp/errors.UnacceptableResponseError.
 //
 // It closes resp.Body.
 func checkResponse(
@@ -64,7 +67,7 @@ func checkResponse(
 			return string(body) == wantBody
 		}
 	}
-	respErr := new(UnacceptableResponseError)
+	respErr := new(errors.UnacceptableResponseError)
 	statusCode, status := resp.StatusCode, resp.Status
 	if !acceptStatus(statusCode, status) {
 		respErr.StatusCode, respErr.Status = statusCode, status

@@ -16,7 +16,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package model provides structures for Stanford CoreNLP.
+// Package model defines structures for Stanford CoreNLP in its subpackages
+// and provides functions to parse them from ProtoBuf wire encoding.
 //
 // To fit different versions of CoreNLP,
 // the structures are organized into subpackages named in the form:
@@ -56,9 +57,6 @@ package model
 // "corenlp_*.pb.go" should be generated in its subpackages.
 // Each "corenlp_*.pb.go" and its corresponding "corenlp_*.proto"
 // should be in the same directory.
-//
-// These commands use the "module=" output mode to verify that
-// the "go_package" defined in "corenlp_*.proto" is appropriate.
 //
 // Note that do not use any filename patterns or path patterns (e.g., *.proto).
 // Patterns may cause errors or unexpected behavior on different platforms.

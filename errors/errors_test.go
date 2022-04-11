@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package client
+package errors
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/donyori/gogo/errors"
+	gogoerrors "github.com/donyori/gogo/errors"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
@@ -34,13 +34,13 @@ import (
 func TestIsTimeoutError(t *testing.T) {
 	testCases := []testIsErrorTestCase{
 		{},
-		{err: errors.New("common error")},
+		{err: gogoerrors.New("common error")},
 		{err: &testTimeoutError{false}},
 		{err: &testTimeoutError{true}, want: true},
-		{err: errors.AutoWrap(&testTimeoutError{false})},
-		{err: errors.AutoWrap(&testTimeoutError{true}), want: true},
-		{err: testWrapError(errors.AutoWrap(&testTimeoutError{false}))},
-		{err: testWrapError(errors.AutoWrap(&testTimeoutError{true})), want: true},
+		{err: gogoerrors.AutoWrap(&testTimeoutError{false})},
+		{err: gogoerrors.AutoWrap(&testTimeoutError{true}), want: true},
+		{err: testWrapError(gogoerrors.AutoWrap(&testTimeoutError{false}))},
+		{err: testWrapError(gogoerrors.AutoWrap(&testTimeoutError{true})), want: true},
 	}
 	testIsErrorFunc(t, IsTimeoutError, testCases)
 }
@@ -49,14 +49,14 @@ func TestIsFileError(t *testing.T) {
 	pathErr := &fs.PathError{
 		Op:   "test",
 		Path: "/",
-		Err:  errors.New("path error"),
+		Err:  gogoerrors.New("path error"),
 	}
 	testCases := []testIsErrorTestCase{
 		{},
-		{err: errors.New("common error")},
+		{err: gogoerrors.New("common error")},
 		{err: pathErr, want: true},
-		{err: errors.AutoWrap(pathErr), want: true},
-		{err: testWrapError(errors.AutoWrap(pathErr)), want: true},
+		{err: gogoerrors.AutoWrap(pathErr), want: true},
+		{err: testWrapError(gogoerrors.AutoWrap(pathErr)), want: true},
 	}
 	testIsErrorFunc(t, IsFileError, testCases)
 }
@@ -65,14 +65,14 @@ func TestIsConnectionError(t *testing.T) {
 	urlErr := &url.Error{
 		Op:  "test",
 		URL: "https://www.example.com/index.html",
-		Err: errors.New("URL error"),
+		Err: gogoerrors.New("URL error"),
 	}
 	testCases := []testIsErrorTestCase{
 		{},
-		{err: errors.New("common error")},
+		{err: gogoerrors.New("common error")},
 		{err: urlErr, want: true},
-		{err: errors.AutoWrap(urlErr), want: true},
-		{err: testWrapError(errors.AutoWrap(urlErr)), want: true},
+		{err: gogoerrors.AutoWrap(urlErr), want: true},
+		{err: testWrapError(gogoerrors.AutoWrap(urlErr)), want: true},
 	}
 	testIsErrorFunc(t, IsConnectionError, testCases)
 }
@@ -87,10 +87,10 @@ func TestIsUnacceptableResponseError(t *testing.T) {
 	}
 	testCases := []testIsErrorTestCase{
 		{},
-		{err: errors.New("common error")},
+		{err: gogoerrors.New("common error")},
 		{err: upe, want: true},
-		{err: errors.AutoWrap(upe), want: true},
-		{err: testWrapError(errors.AutoWrap(upe)), want: true},
+		{err: gogoerrors.AutoWrap(upe), want: true},
+		{err: testWrapError(gogoerrors.AutoWrap(upe)), want: true},
 	}
 	testIsErrorFunc(t, IsUnacceptableResponseError, testCases)
 }
@@ -99,14 +99,14 @@ func TestIsProtoBufError(t *testing.T) {
 	pe := &ProtoBufError{
 		Op:   "test",
 		Type: "test_type",
-		Err:  errors.New("ProtoBuf error"),
+		Err:  gogoerrors.New("ProtoBuf error"),
 	}
 	testCases := []testIsErrorTestCase{
 		{},
-		{err: errors.New("common error")},
+		{err: gogoerrors.New("common error")},
 		{err: pe, want: true},
-		{err: errors.AutoWrap(pe), want: true},
-		{err: testWrapError(errors.AutoWrap(pe)), want: true},
+		{err: gogoerrors.AutoWrap(pe), want: true},
+		{err: testWrapError(gogoerrors.AutoWrap(pe)), want: true},
 	}
 	testIsErrorFunc(t, IsProtoBufError, testCases)
 }
@@ -126,7 +126,7 @@ func TestNewProtoBufError(t *testing.T) {
 	}
 	anonymousStructType := "struct { client.testTimeoutError; name string; i int; err error; doc *pb.Document }"
 
-	underlyingErr := errors.New("ProtoBuf error")
+	underlyingErr := gogoerrors.New("ProtoBuf error")
 	typeWantCases := []struct {
 		showName string
 		v        interface{}
@@ -171,7 +171,7 @@ func TestNewProtoBufError(t *testing.T) {
 // different functions, for example:
 //  testWrapError(errors.AutoWrap(err))
 func testWrapError(err error) error {
-	return errors.AutoWrap(err)
+	return gogoerrors.AutoWrap(err)
 }
 
 // testIsErrorTestCase combines an error and a boolean value

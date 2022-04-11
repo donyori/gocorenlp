@@ -16,10 +16,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package client
+package errors
 
 import (
-	"errors"
+	stderrors "errors"
 	"io/fs"
 	"net/url"
 	"reflect"
@@ -31,35 +31,35 @@ import (
 // IsTimeoutError reports whether the specified error is caused by a timeout.
 func IsTimeoutError(err error) bool {
 	var t interface{ Timeout() bool }
-	return errors.As(err, &t) && t.Timeout()
+	return stderrors.As(err, &t) && t.Timeout()
 }
 
 // IsFileError reports whether the specified error is caused by
 // operating a file or file path.
 func IsFileError(err error) bool {
 	var e *fs.PathError
-	return errors.As(err, &e)
+	return stderrors.As(err, &e)
 }
 
 // IsConnectionError reports whether the specified error is encountered
 // during sending an HTTP request and receiving the response.
 func IsConnectionError(err error) bool {
 	var e *url.Error
-	return errors.As(err, &e)
+	return stderrors.As(err, &e)
 }
 
 // IsUnacceptableResponseError reports whether the specified error
 // is caused by an unacceptable HTTP response.
 func IsUnacceptableResponseError(err error) bool {
 	var e *UnacceptableResponseError
-	return errors.As(err, &e)
+	return stderrors.As(err, &e)
 }
 
 // IsProtoBufError reports whether the specified error is
 // encountered during reading or writing ProtoBuf messages.
 func IsProtoBufError(err error) bool {
 	var e *ProtoBufError
-	return errors.As(err, &e)
+	return stderrors.As(err, &e)
 }
 
 // UnacceptableResponseError records an unacceptable HTTP response,

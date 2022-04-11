@@ -28,10 +28,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"google.golang.org/protobuf/encoding/protowire"
+	gogoerrors "github.com/donyori/gogo/errors"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/donyori/gogo/errors"
+	"github.com/donyori/gocorenlp/model"
 )
 
 // Client is an interface representing an HTTP client
@@ -71,12 +71,12 @@ type Client interface {
 	//  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 	//  ...
 	//  outDoc := new(pb.Document)
-	//  err := Annotate(reader, "tokenize,ssplit,pos", outDoc)
+	//  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
 	//  ...
 	//
 	// If outDoc is nil or not a pointer to Document,
 	// a runtime error will occur.
-	Annotate(reader io.Reader, annotators string, outDoc proto.Message) error
+	Annotate(input io.Reader, annotators string, outDoc proto.Message) error
 
 	// AnnotateString sends an annotation request with
 	// the specified text and annotators.
@@ -137,7 +137,7 @@ func New(opt *Options) (c Client, err error) {
 	t := newClientImpl(opt)
 	err = t.Live()
 	if err != nil {
-		return nil, errors.AutoWrap(err)
+		return nil, gogoerrors.AutoWrap(err)
 	}
 	return t, nil
 }
@@ -202,7 +202,7 @@ func (c *clientImpl) Live() error {
 	}
 	resp, err := c.c.Get(liveUrl.String())
 	if err != nil {
-		return errors.AutoWrap(err)
+		return gogoerrors.AutoWrap(err)
 	}
 	_, err = checkResponse(
 		resp,
@@ -210,10 +210,7 @@ func (c *clientImpl) Live() error {
 		makeAcceptBodyEqualTrimSpace("live"),
 		"live",
 	)
-	if err != nil {
-		return errors.AutoWrap(err)
-	}
-	return nil
+	return gogoerrors.AutoWrap(err)
 }
 
 // Ready sends a status request to the readiness endpoint (/ready) and
@@ -230,7 +227,7 @@ func (c *clientImpl) Ready() error {
 	}
 	resp, err := c.c.Get(readyUrl.String())
 	if err != nil {
-		return errors.AutoWrap(err)
+		return gogoerrors.AutoWrap(err)
 	}
 	_, err = checkResponse(
 		resp,
@@ -238,10 +235,7 @@ func (c *clientImpl) Ready() error {
 		makeAcceptBodyEqualTrimSpace("ready"),
 		"ready",
 	)
-	if err != nil {
-		return errors.AutoWrap(err)
-	}
-	return nil
+	return gogoerrors.AutoWrap(err)
 }
 
 // Annotate sends an annotation request with the specified annotators
@@ -264,12 +258,12 @@ func (c *clientImpl) Ready() error {
 //  import "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 //  ...
 //  outDoc := new(pb.Document)
-//  err := Annotate(reader, "tokenize,ssplit,pos", outDoc)
+//  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
 //  ...
 //
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
-func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.Message) error {
+func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 	// Make request URL.
 	ann := strings.Join(strings.Fields(annotators), "") // drop white space
 	if len(ann) == 0 {
@@ -284,7 +278,7 @@ func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.
 	propBytes, err := json.Marshal(prop)
 	if err != nil {
 		// This should never happen.
-		return errors.AutoWrap(err)
+		return gogoerrors.AutoWrap(err)
 	}
 	qv := url.Values{"properties": []string{string(propBytes)}}
 	annUrl := &url.URL{
@@ -295,33 +289,17 @@ func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.
 	}
 
 	// Send request and read response.
-	resp, err := c.c.Post(annUrl.String(), c.contentType, reader)
+	resp, err := c.c.Post(annUrl.String(), c.contentType, input)
 	if err != nil {
-		return errors.AutoWrap(err)
+		return gogoerrors.AutoWrap(err)
 	}
 	data, err := checkResponse(resp, nil, nil, "")
 	if err != nil {
-		return errors.AutoWrap(err)
+		return gogoerrors.AutoWrap(err)
 	}
 
 	// Parse ProtoBuf message.
-	v, n := protowire.ConsumeBytes(data)
-	if n < 0 {
-		return errors.AutoWrap(NewProtoBufError(
-			"google.golang.org/protobuf/encoding/protowire.ConsumeBytes",
-			data,
-			err,
-		))
-	}
-	err = proto.Unmarshal(v, outDoc)
-	if err != nil {
-		return errors.AutoWrap(NewProtoBufError(
-			"google.golang.org/protobuf/proto.Unmarshal",
-			outDoc,
-			err,
-		))
-	}
-	return nil
+	return gogoerrors.AutoWrap(model.DecodeResponseBody(data, outDoc))
 }
 
 // AnnotateString sends an annotation request with
@@ -350,11 +328,7 @@ func (c *clientImpl) Annotate(reader io.Reader, annotators string, outDoc proto.
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
 func (c *clientImpl) AnnotateString(text string, annotators string, outDoc proto.Message) error {
-	err := errors.AutoWrap(c.Annotate(strings.NewReader(text), annotators, outDoc))
-	if err != nil {
-		return errors.AutoWrap(err)
-	}
-	return nil
+	return gogoerrors.AutoWrap(c.Annotate(strings.NewReader(text), annotators, outDoc))
 }
 
 // Shutdown sends a shutdown request with the specified key
@@ -372,7 +346,7 @@ func (c *clientImpl) Shutdown(key string) error {
 	}
 	resp, err := c.c.Get(shutdownUrl.String())
 	if err != nil {
-		return errors.AutoWrap(err)
+		return gogoerrors.AutoWrap(err)
 	}
 	wantBody := "Shutdown successful!"
 	_, err = checkResponse(
@@ -381,10 +355,7 @@ func (c *clientImpl) Shutdown(key string) error {
 		makeAcceptBodyEqualTrimSpace(wantBody),
 		wantBody,
 	)
-	if err != nil {
-		return errors.AutoWrap(err)
-	}
-	return nil
+	return gogoerrors.AutoWrap(err)
 }
 
 // ShutdownLocal finds the shutdown key and then sends
@@ -401,13 +372,9 @@ func (c *clientImpl) ShutdownLocal() error {
 	}
 	key, err := os.ReadFile(name)
 	if err != nil {
-		return errors.AutoWrap(fmt.Errorf("failed to find the key: %v", err))
+		return gogoerrors.AutoWrap(fmt.Errorf("failed to find the key: %v", err))
 	}
-	err = c.Shutdown(string(key))
-	if err != nil {
-		return errors.AutoWrap(err)
-	}
-	return nil
+	return gogoerrors.AutoWrap(c.Shutdown(string(key)))
 }
 
 func (c *clientImpl) private() {}
