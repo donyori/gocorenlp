@@ -21,29 +21,3 @@
 //
 // The corresponding commit hash is 29765338a2e8d82fc8cef5b34a5cf56a69b0669f.
 package pb
-
-// The following go:generate directive is for compiling the file
-// "corenlp_v3.6.0-29765338a2e8.proto" in this directory.
-//
-// Before running it, make sure that the ProtoBuf compiler "protoc" and
-// its Go plugin "protoc-gen-go" are installed and available in $PATH.
-//
-// To install "protoc", see <https://developers.google.com/protocol-buffers/docs/downloads>
-// and follow the instructions in the README.
-//
-// To install "protoc-gen-go", run the following command:
-//  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-//
-// After running this go:generate directive, a file named
-// "corenlp_v3.6.0-29765338a2e8.pb.go" should be generated in this directory.
-//
-// This command uses the "module=" output mode to verify that the "go_package"
-// defined in "corenlp_v3.6.0-29765338a2e8.proto" is appropriate.
-// But the "paths=source_relative" output mode can make the command
-// more concise, as follows:
-//  protoc --go_out=. --go_opt=paths=source_relative corenlp_v3.6.0-29765338a2e8.proto
-//
-// Note that do not use any filename patterns or path patterns (e.g., *.proto).
-// Patterns may cause errors or unexpected behavior on different platforms.
-//
-//go:generate protoc --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model/v3.6.0-29765338a2e8/pb corenlp_v3.6.0-29765338a2e8.proto
