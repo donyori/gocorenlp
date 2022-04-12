@@ -23,27 +23,39 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	gogoerrors "github.com/donyori/gogo/errors"
+	"github.com/donyori/gogo/runtime"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
+var PackageSimpleName string
+
+func init() {
+	pkg, _, ok := runtime.CallerPkgFunc(0)
+	if !ok {
+		panic("failed to retrieve package name")
+	}
+	PackageSimpleName = pkg[strings.LastIndexByte(pkg, '/')+1:]
+}
+
 func TestIsTimeoutError(t *testing.T) {
-	testCases := []testIsErrorTestCase{
+	testCases := []IsErrorTestCase{
 		{},
 		{err: gogoerrors.New("common error")},
-		{err: &testTimeoutError{false}},
-		{err: &testTimeoutError{true}, want: true},
-		{err: gogoerrors.AutoWrap(&testTimeoutError{false})},
-		{err: gogoerrors.AutoWrap(&testTimeoutError{true}), want: true},
-		{err: testWrapError(gogoerrors.AutoWrap(&testTimeoutError{false}))},
-		{err: testWrapError(gogoerrors.AutoWrap(&testTimeoutError{true})), want: true},
+		{err: &timeoutError{false}},
+		{err: &timeoutError{true}, want: true},
+		{err: gogoerrors.AutoWrap(&timeoutError{false})},
+		{err: gogoerrors.AutoWrap(&timeoutError{true}), want: true},
+		{err: WrapError(gogoerrors.AutoWrap(&timeoutError{false}))},
+		{err: WrapError(gogoerrors.AutoWrap(&timeoutError{true})), want: true},
 	}
-	testIsErrorFunc(t, errors.IsTimeoutError, testCases)
+	IsErrorFunc(t, errors.IsTimeoutError, testCases)
 }
 
 func TestIsFileError(t *testing.T) {
@@ -52,14 +64,14 @@ func TestIsFileError(t *testing.T) {
 		Path: "/",
 		Err:  gogoerrors.New("path error"),
 	}
-	testCases := []testIsErrorTestCase{
+	testCases := []IsErrorTestCase{
 		{},
 		{err: gogoerrors.New("common error")},
 		{err: pathErr, want: true},
 		{err: gogoerrors.AutoWrap(pathErr), want: true},
-		{err: testWrapError(gogoerrors.AutoWrap(pathErr)), want: true},
+		{err: WrapError(gogoerrors.AutoWrap(pathErr)), want: true},
 	}
-	testIsErrorFunc(t, errors.IsFileError, testCases)
+	IsErrorFunc(t, errors.IsFileError, testCases)
 }
 
 func TestIsConnectionError(t *testing.T) {
@@ -68,14 +80,14 @@ func TestIsConnectionError(t *testing.T) {
 		URL: "https://www.example.com/index.html",
 		Err: gogoerrors.New("URL error"),
 	}
-	testCases := []testIsErrorTestCase{
+	testCases := []IsErrorTestCase{
 		{},
 		{err: gogoerrors.New("common error")},
 		{err: urlErr, want: true},
 		{err: gogoerrors.AutoWrap(urlErr), want: true},
-		{err: testWrapError(gogoerrors.AutoWrap(urlErr)), want: true},
+		{err: WrapError(gogoerrors.AutoWrap(urlErr)), want: true},
 	}
-	testIsErrorFunc(t, errors.IsConnectionError, testCases)
+	IsErrorFunc(t, errors.IsConnectionError, testCases)
 }
 
 func TestIsUnacceptableResponseError(t *testing.T) {
@@ -86,14 +98,14 @@ func TestIsUnacceptableResponseError(t *testing.T) {
 		Body:       "404 Not Found (test body)",
 		WantBody:   "",
 	}
-	testCases := []testIsErrorTestCase{
+	testCases := []IsErrorTestCase{
 		{},
 		{err: gogoerrors.New("common error")},
 		{err: upe, want: true},
 		{err: gogoerrors.AutoWrap(upe), want: true},
-		{err: testWrapError(gogoerrors.AutoWrap(upe)), want: true},
+		{err: WrapError(gogoerrors.AutoWrap(upe)), want: true},
 	}
-	testIsErrorFunc(t, errors.IsUnacceptableResponseError, testCases)
+	IsErrorFunc(t, errors.IsUnacceptableResponseError, testCases)
 }
 
 func TestIsProtoBufError(t *testing.T) {
@@ -102,14 +114,14 @@ func TestIsProtoBufError(t *testing.T) {
 		Type: "test_type",
 		Err:  gogoerrors.New("ProtoBuf error"),
 	}
-	testCases := []testIsErrorTestCase{
+	testCases := []IsErrorTestCase{
 		{},
 		{err: gogoerrors.New("common error")},
 		{err: pe, want: true},
 		{err: gogoerrors.AutoWrap(pe), want: true},
-		{err: testWrapError(gogoerrors.AutoWrap(pe)), want: true},
+		{err: WrapError(gogoerrors.AutoWrap(pe)), want: true},
 	}
-	testIsErrorFunc(t, errors.IsProtoBufError, testCases)
+	IsErrorFunc(t, errors.IsProtoBufError, testCases)
 }
 
 func TestNewProtoBufError(t *testing.T) {
@@ -118,14 +130,14 @@ func TestNewProtoBufError(t *testing.T) {
 	docType := "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb.Document"
 
 	var st struct {
-		testTimeoutError
+		timeoutError
 
 		name string
 		i    int
 		err  error
 		doc  *pb.Document
 	}
-	anonymousStructType := "struct { errors.testTimeoutError; name string; i int; err error; doc *pb.Document }"
+	anonymousStructType := "struct { " + PackageSimpleName + ".timeoutError; name string; i int; err error; doc *pb.Document }"
 
 	underlyingErr := gogoerrors.New("ProtoBuf error")
 	typeWantCases := []struct {
@@ -165,26 +177,26 @@ func TestNewProtoBufError(t *testing.T) {
 	}
 }
 
-// testWrapError wraps the specified error using
+// WrapError wraps the specified error using
 // github.com/donyori/gogo/errors.AutoWrap.
 //
 // It is useful for achieving wrapping an error within
 // different functions, for example:
-//  testWrapError(errors.AutoWrap(err))
-func testWrapError(err error) error {
+//  WrapError(errors.AutoWrap(err))
+func WrapError(err error) error {
 	return gogoerrors.AutoWrap(err)
 }
 
-// testIsErrorTestCase combines an error and a boolean value
+// IsErrorTestCase combines an error and a boolean value
 // for use by TestIsXxxError.
-type testIsErrorTestCase struct {
+type IsErrorTestCase struct {
 	err  error
 	want bool
 }
 
-// testIsErrorFunc tests the specified IsXxxError function f
+// IsErrorFunc tests the specified IsXxxError function f
 // with the specified test cases.
-func testIsErrorFunc(t *testing.T, f func(err error) bool, testCases []testIsErrorTestCase) {
+func IsErrorFunc(t *testing.T, f func(err error) bool, testCases []IsErrorTestCase) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("error=%v", tc.err), func(t *testing.T) {
 			if r := f(tc.err); r != tc.want {
@@ -194,15 +206,17 @@ func testIsErrorFunc(t *testing.T, f func(err error) bool, testCases []testIsErr
 	}
 }
 
-// testTimeoutError is a timeout error for use by TestIsTimeoutError.
-type testTimeoutError struct {
+// timeoutError is a timeout error for use by TestIsTimeoutError.
+//
+// It is a private type for testing unexported struct.
+type timeoutError struct {
 	timeout bool
 }
 
-func (e *testTimeoutError) Error() string {
+func (e *timeoutError) Error() string {
 	return "timeout (test)"
 }
 
-func (e *testTimeoutError) Timeout() bool {
+func (e *timeoutError) Timeout() bool {
 	return e != nil && e.timeout
 }

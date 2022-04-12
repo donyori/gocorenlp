@@ -33,7 +33,7 @@ func TestExportStdErrors(t *testing.T) {
 	if err1 == nil {
 		t.Fatal(`New("test error 1") - got nil;`, errorMsg)
 	}
-	err2 := &testError{Msg: "test error 2"}
+	err2 := &Error{Msg: "test error 2"}
 	if err := errors.Unwrap(err1); err != nil {
 		t.Errorf("Unwrap(err1) - got %v; %s", err, errorMsg)
 	}
@@ -45,11 +45,11 @@ func TestExportStdErrors(t *testing.T) {
 	}
 }
 
-type testError struct {
+type Error struct {
 	Msg string
 }
 
-func (e *testError) Error() string {
+func (e *Error) Error() string {
 	if e == nil {
 		return ""
 	}

@@ -26,14 +26,14 @@ import (
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
-const testText = `
+const RosesAreRed = `
 Roses are red.
   Violets are blue.
 Sugar is sweet.
   And so are you.
 `
 
-const testBase64ResponseBody = `
+const Base64ResponseBody = `
 jAcKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoSwQEKMQoFUm9zZXMSBE5OUFMaBVJv
 c2VzKgEKMgEgOgVSb3Nlc1gBYAaIAQCQAQGoAQCwAgAKKgoDYXJlEgNWQlAaA2Fy
@@ -56,7 +56,7 @@ AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 `
 
 func TestDecodeResponseBody(t *testing.T) {
-	data, err := base64.StdEncoding.DecodeString(testBase64ResponseBody)
+	data, err := base64.StdEncoding.DecodeString(Base64ResponseBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,8 +64,8 @@ func TestDecodeResponseBody(t *testing.T) {
 	if err = model.DecodeResponseBody(data, doc); err != nil {
 		t.Error(err)
 	}
-	if txt := doc.GetText(); txt != testText {
-		t.Errorf("got doc text %q; want %q", txt, testText)
+	if txt := doc.GetText(); txt != RosesAreRed {
+		t.Errorf("got doc text %q; want %q", txt, RosesAreRed)
 	}
 
 	const nSentences = 4
