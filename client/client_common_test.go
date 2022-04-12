@@ -116,8 +116,7 @@ func testAnnotateMethodsFunc(t *testing.T, f func(t *testing.T, annotators strin
 func testCheckAnnotation(t *testing.T, doc *pb.Document) {
 	const nTokens = 10
 	wordArray := [nTokens]string{"The", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog", "."}
-	beforeArray := [nTokens]string{"", " ", " ", " ", " ", " ", " ", " ", " "}
-	afterArray := [nTokens]string{" ", " ", " ", " ", " ", " ", " ", " "}
+	gapArray := [nTokens + 1]string{"", " ", " ", " ", " ", " ", " ", " ", " "}
 	posArray := [nTokens]string{"DT", "JJ", "JJ", "NN", "VBD", "IN", "DT", "JJ", "NN", "."}
 
 	if txt := doc.GetText(); txt != testText {
@@ -137,16 +136,16 @@ func testCheckAnnotation(t *testing.T, doc *pb.Document) {
 	}
 	for i, token := range tokens {
 		if w := token.GetWord(); w != wordArray[i] {
-			t.Errorf("got No.%d token.Word %q; want %q", i, w, wordArray[i])
+			t.Errorf("Token %d: got Word %q; want %q", i, w, wordArray[i])
 		}
-		if b := token.GetBefore(); b != beforeArray[i] {
-			t.Errorf("got No.%d token.Before %q; want %q", i, b, beforeArray[i])
+		if b := token.GetBefore(); b != gapArray[i] {
+			t.Errorf("Token %d: got Before %q; want %q", i, b, gapArray[i])
 		}
-		if a := token.GetAfter(); a != afterArray[i] {
-			t.Errorf("got No.%d token.After %q; want %q", i, a, afterArray[i])
+		if a := token.GetAfter(); a != gapArray[i+1] {
+			t.Errorf("Token %d: got After %q; want %q", i, a, gapArray[i+1])
 		}
 		if p := token.GetPos(); p != posArray[i] {
-			t.Errorf("got No.%d token.Pos %q; want %q", i, p, posArray[i])
+			t.Errorf("Token %d: got Pos %q; want %q", i, p, posArray[i])
 		}
 	}
 }

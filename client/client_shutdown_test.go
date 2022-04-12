@@ -27,8 +27,16 @@ const testServerId string = "test_server"
 
 // Run the following test with a Stanford CoreNLP 4.4.0 server running and
 // (both the main server and the status server) listening on 127.0.0.1:9300.
+//
+// Set testEnableShutdownLocalBasicTest to true
+// when you are ready to run the following test.
+
+const testEnableShutdownLocalBasicTest = false
 
 func TestClientImpl_ShutdownLocal_Basic(t *testing.T) {
+	if !testEnableShutdownLocalBasicTest {
+		return
+	}
 	c := newClientImpl(&Options{Port: testShutdownPort})
 	if err := c.ShutdownLocal(); err != nil {
 		testLogErrorChain(t, err)
@@ -38,8 +46,16 @@ func TestClientImpl_ShutdownLocal_Basic(t *testing.T) {
 // Run the following test with a Stanford CoreNLP 4.4.0 server running,
 // (both the main server and the status server) listening on 127.0.0.1:9300,
 // and starting with -server_id=test_Server.
+//
+// Set testEnableShutdownLocalServerIdTest to true
+// when you are ready to run the following test.
+
+const testEnableShutdownLocalServerIdTest = false
 
 func TestClientImpl_ShutdownLocal_ServerId(t *testing.T) {
+	if !testEnableShutdownLocalServerIdTest {
+		return
+	}
 	c := newClientImpl(&Options{
 		Port:     testShutdownPort,
 		ServerId: testServerId,
@@ -52,8 +68,16 @@ func TestClientImpl_ShutdownLocal_ServerId(t *testing.T) {
 // Run the following test with a Stanford CoreNLP 4.4.0 server running,
 // with the main server listening on 127.0.0.1:9300 and
 // the status server listening on 127.0.0.1:9301.
+//
+// Set testEnableShutdownLocalDiffStatusPortTest to true
+// when you are ready to run the following test.
+
+const testEnableShutdownLocalDiffStatusPortTest = false
 
 func TestClientImpl_ShutdownLocal_DiffStatusPort(t *testing.T) {
+	if !testEnableShutdownLocalDiffStatusPortTest {
+		return
+	}
 	c := newClientImpl(&Options{
 		Port:       testShutdownPort,
 		StatusPort: testDiffStatusPortPort + 1,

@@ -24,10 +24,18 @@ import "testing"
 // with the main server listening on 127.0.0.1:9100 and
 // the status server listening on 127.0.0.1:9101.
 // The server should use its default language model.
+//
+// Set testEnableDiffStatusTest to true
+// when you are ready to run the following tests.
+
+const testEnableDiffStatusTest = false
 
 const testDiffStatusPortPort uint16 = 9100
 
 func TestNew_DiffStatusPort(t *testing.T) {
+	if !testEnableDiffStatusTest {
+		return
+	}
 	c, err := New(&Options{
 		Port:       testDiffStatusPortPort,
 		StatusPort: testDiffStatusPortPort + 1,
@@ -42,6 +50,9 @@ func TestNew_DiffStatusPort(t *testing.T) {
 }
 
 func TestClientImpl_Live_DiffStatusPort(t *testing.T) {
+	if !testEnableDiffStatusTest {
+		return
+	}
 	c := testNewDiffStatusPortClientImpl()
 	if err := c.Live(); err != nil {
 		testLogErrorChain(t, err)
@@ -49,6 +60,9 @@ func TestClientImpl_Live_DiffStatusPort(t *testing.T) {
 }
 
 func TestClientImpl_Ready_DiffStatusPort(t *testing.T) {
+	if !testEnableDiffStatusTest {
+		return
+	}
 	c := testNewDiffStatusPortClientImpl()
 	if err := c.Ready(); err != nil {
 		testLogErrorChain(t, err)
@@ -56,14 +70,23 @@ func TestClientImpl_Ready_DiffStatusPort(t *testing.T) {
 }
 
 func TestClientImpl_Annotate_DiffStatusPort(t *testing.T) {
+	if !testEnableDiffStatusTest {
+		return
+	}
 	testAnnotateFunc(t, testNewDiffStatusPortClientImpl)
 }
 
 func TestClientImpl_AnnotateString_DiffStatusPort(t *testing.T) {
+	if !testEnableDiffStatusTest {
+		return
+	}
 	testAnnotateStringFunc(t, testNewDiffStatusPortClientImpl)
 }
 
 func TestClientImpl_AnnotateRaw_DiffStatusPort(t *testing.T) {
+	if !testEnableDiffStatusTest {
+		return
+	}
 	testAnnotateRawFunc(t, testNewDiffStatusPortClientImpl)
 }
 

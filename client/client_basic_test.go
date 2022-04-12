@@ -23,8 +23,16 @@ import "testing"
 // Run the following tests with a Stanford CoreNLP 4.4.0 server running and
 // (both the main server and the status server) listening on 127.0.0.1:9000.
 // The server should use its default language model.
+//
+// Set testEnableBasicTest to true
+// when you are ready to run the following tests.
+
+const testEnableBasicTest = false
 
 func TestNew_Basic(t *testing.T) {
+	if !testEnableBasicTest {
+		return
+	}
 	c, err := New(nil)
 	if err != nil {
 		testLogErrorChain(t, err)
@@ -36,6 +44,9 @@ func TestNew_Basic(t *testing.T) {
 }
 
 func TestClientImpl_Live_Basic(t *testing.T) {
+	if !testEnableBasicTest {
+		return
+	}
 	c := testNewBasicClientImpl()
 	if err := c.Live(); err != nil {
 		testLogErrorChain(t, err)
@@ -43,6 +54,9 @@ func TestClientImpl_Live_Basic(t *testing.T) {
 }
 
 func TestClientImpl_Ready_Basic(t *testing.T) {
+	if !testEnableBasicTest {
+		return
+	}
 	c := testNewBasicClientImpl()
 	if err := c.Ready(); err != nil {
 		testLogErrorChain(t, err)
@@ -50,14 +64,23 @@ func TestClientImpl_Ready_Basic(t *testing.T) {
 }
 
 func TestClientImpl_Annotate_Basic(t *testing.T) {
+	if !testEnableBasicTest {
+		return
+	}
 	testAnnotateFunc(t, testNewBasicClientImpl)
 }
 
 func TestClientImpl_AnnotateString_Basic(t *testing.T) {
+	if !testEnableBasicTest {
+		return
+	}
 	testAnnotateStringFunc(t, testNewBasicClientImpl)
 }
 
 func TestClientImpl_AnnotateRaw_Basic(t *testing.T) {
+	if !testEnableBasicTest {
+		return
+	}
 	testAnnotateRawFunc(t, testNewBasicClientImpl)
 }
 

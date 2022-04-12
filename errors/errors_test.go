@@ -124,7 +124,7 @@ func TestNewProtoBufError(t *testing.T) {
 		err  error
 		doc  *pb.Document
 	}
-	anonymousStructType := "struct { client.testTimeoutError; name string; i int; err error; doc *pb.Document }"
+	anonymousStructType := "struct { errors.testTimeoutError; name string; i int; err error; doc *pb.Document }"
 
 	underlyingErr := gogoerrors.New("ProtoBuf error")
 	typeWantCases := []struct {

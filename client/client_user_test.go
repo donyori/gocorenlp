@@ -24,11 +24,19 @@ import "testing"
 // (both the main server and the status server) listening on 127.0.0.1:9200,
 // with username="user1" and password="u1%password".
 // The server should use its default language model.
+//
+// Set testEnableUserTest to true
+// when you are ready to run the following tests.
+
+const testEnableUserTest = false
 
 const testUserPort uint16 = 9200
 const testUserUsername, testUserPassword string = "user1", "u1%password"
 
 func TestNew_User(t *testing.T) {
+	if !testEnableUserTest {
+		return
+	}
 	c, err := New(&Options{
 		Port:     testUserPort,
 		Username: testUserUsername,
@@ -44,6 +52,9 @@ func TestNew_User(t *testing.T) {
 }
 
 func TestClientImpl_Live_User(t *testing.T) {
+	if !testEnableUserTest {
+		return
+	}
 	c := testNewUserClientImpl()
 	if err := c.Live(); err != nil {
 		testLogErrorChain(t, err)
@@ -51,6 +62,9 @@ func TestClientImpl_Live_User(t *testing.T) {
 }
 
 func TestClientImpl_Ready_User(t *testing.T) {
+	if !testEnableUserTest {
+		return
+	}
 	c := testNewUserClientImpl()
 	if err := c.Ready(); err != nil {
 		testLogErrorChain(t, err)
@@ -58,14 +72,23 @@ func TestClientImpl_Ready_User(t *testing.T) {
 }
 
 func TestClientImpl_Annotate_User(t *testing.T) {
+	if !testEnableUserTest {
+		return
+	}
 	testAnnotateFunc(t, testNewUserClientImpl)
 }
 
 func TestClientImpl_AnnotateString_User(t *testing.T) {
+	if !testEnableUserTest {
+		return
+	}
 	testAnnotateStringFunc(t, testNewUserClientImpl)
 }
 
 func TestClientImpl_AnnotateRaw_User(t *testing.T) {
+	if !testEnableUserTest {
+		return
+	}
 	testAnnotateRawFunc(t, testNewUserClientImpl)
 }
 

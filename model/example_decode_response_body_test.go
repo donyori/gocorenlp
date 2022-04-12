@@ -20,19 +20,12 @@ package model
 
 import (
 	"encoding/base64"
-	"testing"
+	"fmt"
 
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
-const testText = `
-Roses are red.
-  Violets are blue.
-Sugar is sweet.
-  And so are you.
-`
-
-const testBase64ResponseBody = `
+const ExampleDataBase64 = `
 jAcKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoSwQEKMQoFUm9zZXMSBE5OUFMaBVJv
 c2VzKgEKMgEgOgVSb3Nlc1gBYAaIAQCQAQGoAQCwAgAKKgoDYXJlEgNWQlAaA2Fy
@@ -54,63 +47,32 @@ GgN5b3UqASAyADoDeW91WEFgRIgBD5ABEKgBALACAAohCgEuEgEuGgEuKgAyAQo6
 AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 `
 
-func TestDecodeResponseBody(t *testing.T) {
-	data, err := base64.StdEncoding.DecodeString(testBase64ResponseBody)
+func RetrieveRespBody() []byte {
+	// Here, we retrieve the response body from the base64 encoding string.
+	// You can retrieve it from where you saved it.
+	b, err := base64.StdEncoding.DecodeString(ExampleDataBase64)
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
+	return b
+}
+
+func ExampleDecodeResponseBody() {
+	// Retrieve the Stanford CoreNLP server response body.
+	b := RetrieveRespBody()
+
 	doc := new(pb.Document)
-	if err = DecodeResponseBody(data, doc); err != nil {
-		t.Error(err)
+	err := DecodeResponseBody(b, doc)
+	if err != nil {
+		panic(err) // handle error
 	}
-	if txt := doc.GetText(); txt != testText {
-		t.Errorf("got doc text %q; want %q", txt, testText)
-	}
+	fmt.Println(doc.GetText())
 
-	const nSentences = 4
-	nTokens := [nSentences]int{4, 4, 4, 5}
-	wordLists := [nSentences][]string{
-		{"Roses", "are", "red", "."},
-		{"Violets", "are", "blue", "."},
-		{"Sugar", "is", "sweet", "."},
-		{"And", "so", "are", "you", "."},
-	}
-	gapLists := [nSentences][]string{
-		{"\n", " ", " ", "", "\n  "},
-		{"\n  ", " ", " ", "", "\n"},
-		{"\n", " ", " ", "", "\n  "},
-		{"\n  ", " ", " ", " ", "", "\n"},
-	}
-	posLists := [nSentences][]string{
-		{"NNPS", "VBP", "JJ", "."},
-		{"NNS", "VBP", "JJ", "."},
-		{"NNP", "VBZ", "JJ", "."},
-		{"CC", "RB", "VBP", "PRP", "."},
-	}
-
-	sentences := doc.GetSentence()
-	if n := len(sentences); n != nSentences {
-		t.Fatalf("got %d sentence(s); want %d", n, nSentences)
-	}
-	for si, sentence := range sentences {
-		tokens := sentence.GetToken()
-		if n := len(tokens); n != nTokens[si] {
-			t.Errorf("sentence %d: got %d token(s); want %d", si, n, nTokens[si])
-			continue
-		}
-		for ti, token := range tokens {
-			if w := token.GetWord(); w != wordLists[si][ti] {
-				t.Errorf("Sentence %d, Token %d: got Word %q; want %q", si, ti, w, wordLists[si][ti])
-			}
-			if b := token.GetBefore(); b != gapLists[si][ti] {
-				t.Errorf("Sentence %d, Token %d: got Before %q; want %q", si, ti, b, gapLists[si][ti])
-			}
-			if a := token.GetAfter(); a != gapLists[si][ti+1] {
-				t.Errorf("Sentence %d, Token %d; got After %q; want %q", si, ti, a, gapLists[si][ti+1])
-			}
-			if p := token.GetPos(); p != posLists[si][ti] {
-				t.Errorf("Sentence %d, Token %d; got POS %q; want %q", si, ti, p, posLists[si][ti])
-			}
-		}
-	}
+	// Output:
+	//
+	// Roses are red.
+	//   Violets are blue.
+	// Sugar is sweet.
+	//   And so are you.
+	//
 }
