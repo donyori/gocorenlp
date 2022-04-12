@@ -19,11 +19,13 @@
 package client
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/donyori/gocorenlp/model"
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
@@ -46,9 +48,8 @@ func testLogErrorChain(tb testing.TB, err error) {
 func testAnnotateFunc(t *testing.T, f func() *clientImpl) {
 	testAnnotateMethodsFunc(t, func(t *testing.T, annotators string) *pb.Document {
 		c := f()
-		reader := strings.NewReader(testText)
 		doc := new(pb.Document)
-		if err := c.Annotate(reader, annotators, doc); err != nil {
+		if err := c.Annotate(strings.NewReader(testText), annotators, doc); err != nil {
 			testLogErrorChain(t, err)
 			return nil
 		}
@@ -63,6 +64,30 @@ func testAnnotateStringFunc(t *testing.T, f func() *clientImpl) {
 		c := f()
 		doc := new(pb.Document)
 		if err := c.AnnotateString(testText, annotators, doc); err != nil {
+			testLogErrorChain(t, err)
+			return nil
+		}
+		return doc
+	})
+}
+
+// testAnnotateRawFunc encapsulates common code for testing
+// the method AnnotateRaw of *clientImpl.
+func testAnnotateRawFunc(t *testing.T, f func() *clientImpl) {
+	testAnnotateMethodsFunc(t, func(t *testing.T, annotators string) *pb.Document {
+		c := f()
+		var b bytes.Buffer
+		written, err := c.AnnotateRaw(strings.NewReader(testText), annotators, &b)
+		if err != nil {
+			testLogErrorChain(t, err)
+			return nil
+		}
+		if n := int64(b.Len()); written != n {
+			t.Errorf("got written %d; want %d", written, n)
+		}
+		doc := new(pb.Document)
+		err = model.DecodeResponseBody(b.Bytes(), doc)
+		if err != nil {
 			testLogErrorChain(t, err)
 			return nil
 		}

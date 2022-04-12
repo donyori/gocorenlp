@@ -61,6 +61,14 @@ func TestClientImpl_Annotate_User(t *testing.T) {
 	testAnnotateFunc(t, testNewUserClientImpl)
 }
 
+func TestClientImpl_AnnotateString_User(t *testing.T) {
+	testAnnotateStringFunc(t, testNewUserClientImpl)
+}
+
+func TestClientImpl_AnnotateRaw_User(t *testing.T) {
+	testAnnotateRawFunc(t, testNewUserClientImpl)
+}
+
 // testNewUserClientImpl creates a *clientImpl
 // connecting to 127.0.0.1:9200,
 // with username="user1",

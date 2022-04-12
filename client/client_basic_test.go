@@ -57,6 +57,10 @@ func TestClientImpl_AnnotateString_Basic(t *testing.T) {
 	testAnnotateStringFunc(t, testNewBasicClientImpl)
 }
 
+func TestClientImpl_AnnotateRaw_Basic(t *testing.T) {
+	testAnnotateRawFunc(t, testNewBasicClientImpl)
+}
+
 // testNewBasicClientImpl creates a *clientImpl
 // connecting to 127.0.0.1:9000,
 // with no userinfo, no timeout,

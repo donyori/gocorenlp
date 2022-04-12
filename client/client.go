@@ -19,6 +19,7 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -63,7 +64,7 @@ type Client interface {
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
-	//  tokenize,ssplit,pos,depparse
+	//  "tokenize,ssplit,pos,depparse"
 	//
 	// outDoc must be a non-nil pointer to an auto-generated Document
 	// structure, for example:
@@ -90,7 +91,7 @@ type Client interface {
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
-	//  tokenize,ssplit,pos,depparse
+	//  "tokenize,ssplit,pos,depparse"
 	//
 	// outDoc must be a non-nil pointer to an auto-generated Document
 	// structure, for example:
@@ -104,6 +105,24 @@ type Client interface {
 	// If outDoc is nil or not a pointer to Document,
 	// a runtime error will occur.
 	AnnotateString(text string, annotators string, outDoc proto.Message) error
+
+	// AnnotateRaw sends an annotation request with the specified annotators
+	// to annotate the data read from the specified reader.
+	// Then AnnotateRaw writes the response body to the specified writer
+	// without parsing. The user can parse it later using the function
+	// github.com/donyori/gocorenlp/model.DecodeResponseBody.
+	//
+	// If no annotators are specified,
+	// the client's default annotators will be used.
+	// If the client's annotators are also not specified,
+	// the server's default annotators will be used.
+	//
+	// The annotators are separated by commas (,) in the string without spaces.
+	// For example:
+	//  "tokenize,ssplit,pos,depparse"
+	//
+	// It returns the number of bytes written and any error encountered.
+	AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error)
 
 	// Shutdown sends a shutdown request with the specified key
 	// to stop the target server.
@@ -204,7 +223,7 @@ func (c *clientImpl) Live() error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	_, err = checkResponse(
+	_, _, err = checkResponse(
 		resp,
 		nil,
 		makeAcceptBodyEqualTrimSpace("live"),
@@ -229,7 +248,7 @@ func (c *clientImpl) Ready() error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	_, err = checkResponse(
+	_, _, err = checkResponse(
 		resp,
 		nil,
 		makeAcceptBodyEqualTrimSpace("ready"),
@@ -250,7 +269,7 @@ func (c *clientImpl) Ready() error {
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
-//  tokenize,ssplit,pos,depparse
+//  "tokenize,ssplit,pos,depparse"
 //
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
@@ -264,42 +283,13 @@ func (c *clientImpl) Ready() error {
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
 func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
-	// Make request URL.
-	ann := strings.Join(strings.Fields(annotators), "") // drop white space
-	if len(ann) == 0 {
-		ann = c.annotators
-	}
-	prop := make(map[string]string, 3)
-	prop["outputFormat"] = "serialized"
-	prop["serializer"] = "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"
-	if len(ann) > 0 {
-		prop["annotators"] = ann
-	}
-	propBytes, err := json.Marshal(prop)
-	if err != nil {
-		// This should never happen.
-		return gogoerrors.AutoWrap(err)
-	}
-	qv := url.Values{"properties": []string{string(propBytes)}}
-	annUrl := &url.URL{
-		Scheme:   "http",
-		User:     c.userinfo,
-		Host:     c.host,
-		RawQuery: qv.Encode(),
-	}
-
-	// Send request and read response.
-	resp, err := c.c.Post(annUrl.String(), c.contentType, input)
+	var b bytes.Buffer
+	_, err := c.AnnotateRaw(input, annotators, &b)
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	data, err := checkResponse(resp, nil, nil, "")
-	if err != nil {
-		return gogoerrors.AutoWrap(err)
-	}
-
 	// Parse ProtoBuf message.
-	return gogoerrors.AutoWrap(model.DecodeResponseBody(data, outDoc))
+	return gogoerrors.AutoWrap(model.DecodeResponseBody(b.Bytes(), outDoc))
 }
 
 // AnnotateString sends an annotation request with
@@ -314,7 +304,7 @@ func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.M
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
-//  tokenize,ssplit,pos,depparse
+//  "tokenize,ssplit,pos,depparse"
 //
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
@@ -329,6 +319,75 @@ func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.M
 // a runtime error will occur.
 func (c *clientImpl) AnnotateString(text string, annotators string, outDoc proto.Message) error {
 	return gogoerrors.AutoWrap(c.Annotate(strings.NewReader(text), annotators, outDoc))
+}
+
+// AnnotateRaw sends an annotation request with the specified annotators
+// to annotate the data read from the specified reader.
+// Then AnnotateRaw writes the response body to the specified writer
+// without parsing. The user can parse it later using the function
+// github.com/donyori/gocorenlp/model.DecodeResponseBody.
+//
+// If no annotators are specified,
+// the client's default annotators will be used.
+// If the client's annotators are also not specified,
+// the server's default annotators will be used.
+//
+// The annotators are separated by commas (,) in the string without spaces.
+// For example:
+//  "tokenize,ssplit,pos,depparse"
+//
+// It returns the number of bytes written and any error encountered.
+func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error) {
+	// Check arguments first.
+	if input == nil {
+		panic(gogoerrors.AutoMsg("input reader is nil"))
+	}
+	if output == nil {
+		panic(gogoerrors.AutoMsg("output writer is nil"))
+	}
+
+	// Make request URL.
+	ann := strings.Join(strings.Fields(annotators), "") // drop white space
+	if len(ann) == 0 {
+		ann = c.annotators
+	}
+	prop := make(map[string]string, 3)
+	prop["outputFormat"] = "serialized"
+	prop["serializer"] = "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"
+	if len(ann) > 0 {
+		prop["annotators"] = ann
+	}
+	propBytes, err := json.Marshal(prop)
+	if err != nil {
+		// This should never happen.
+		return 0, gogoerrors.AutoWrap(err)
+	}
+	qv := url.Values{"properties": []string{string(propBytes)}}
+	annUrl := &url.URL{
+		Scheme:   "http",
+		User:     c.userinfo,
+		Host:     c.host,
+		RawQuery: qv.Encode(),
+	}
+
+	// Send request and forward response body to output.
+	resp, err := c.c.Post(annUrl.String(), c.contentType, input)
+	if err != nil {
+		return 0, gogoerrors.AutoWrap(err)
+	}
+	_, _, err = checkResponse(resp, nil, nil, "")
+	if err != nil {
+		return 0, gogoerrors.AutoWrap(err)
+	}
+	// The return value read of checkResponse must be false
+	// as its acceptBody is nil, wantBody is empty, and it reports no error
+	// (i.e., the response status is acceptable).
+	defer closeIgnoreError(resp.Body)
+	written, err = io.Copy(output, resp.Body)
+	if err != nil {
+		err = gogoerrors.AutoWrap(err)
+	}
+	return
 }
 
 // Shutdown sends a shutdown request with the specified key
@@ -349,7 +408,7 @@ func (c *clientImpl) Shutdown(key string) error {
 		return gogoerrors.AutoWrap(err)
 	}
 	wantBody := "Shutdown successful!"
-	_, err = checkResponse(
+	_, _, err = checkResponse(
 		resp,
 		nil,
 		makeAcceptBodyEqualTrimSpace(wantBody),

@@ -26,8 +26,7 @@ import (
 	"github.com/donyori/gocorenlp/errors"
 )
 
-// checkResponse checks the specified HTTP response and reads its body.
-// It checks the response by checking its status and body.
+// checkResponse checks the status and body of the specified HTTP response.
 //
 // acceptStatus is a function to check the response status.
 // Its two arguments are resp.StatusCode and resp.Status.
@@ -44,19 +43,24 @@ import (
 // It will be stored in the returned error
 // if the response body is unacceptable.
 //
-// checkResponse returns the response body, and reports an error
-// if the response is not as expected.
+// If acceptBody is non-nil or wantBody is non-empty,
+// or the status is unacceptable, checkResponse reads the response body
+// and closes the body reader; otherwise, checkResponse does nothing to
+// the body reader, neither reading nor closing it.
+//
+// checkResponse returns the response body (nil if not read it)
+// and an indicator read to report whether it has attempted to
+// read the response body.
+// If read is true, the body reader is closed by checkResponse.
+// It reports an error if the response is not as expected.
 // If the returned error is non-nil, it is of type
 // *github.com/donyori/gocorenlp/errors.UnacceptableResponseError.
-//
-// It closes resp.Body.
 func checkResponse(
 	resp *http.Response,
 	acceptStatus func(statusCode int, status string) bool,
 	acceptBody func(body []byte) bool,
 	wantBody string,
-) (body []byte, err error) {
-	defer closeIgnoreError(resp.Body)
+) (body []byte, read bool, err error) {
 	if acceptStatus == nil {
 		acceptStatus = func(statusCode int, _ string) bool {
 			return statusCode >= 200 && statusCode < 300
@@ -72,7 +76,11 @@ func checkResponse(
 	if !acceptStatus(statusCode, status) {
 		respErr.StatusCode, respErr.Status = statusCode, status
 		err = respErr
+	} else if acceptBody == nil {
+		return
 	}
+	defer closeIgnoreError(resp.Body)
+	read = true
 	body, respErr.ReadError = io.ReadAll(resp.Body)
 	if len(body) > 0 {
 		respErr.Body = string(body)

@@ -59,6 +59,14 @@ func TestClientImpl_Annotate_DiffStatusPort(t *testing.T) {
 	testAnnotateFunc(t, testNewDiffStatusPortClientImpl)
 }
 
+func TestClientImpl_AnnotateString_DiffStatusPort(t *testing.T) {
+	testAnnotateStringFunc(t, testNewDiffStatusPortClientImpl)
+}
+
+func TestClientImpl_AnnotateRaw_DiffStatusPort(t *testing.T) {
+	testAnnotateRawFunc(t, testNewDiffStatusPortClientImpl)
+}
+
 // testNewDiffStatusPortClientImpl creates a *clientImpl
 // connecting to the main server on 127.0.0.1:9100,
 // the status server on 127.0.0.1:9101,
