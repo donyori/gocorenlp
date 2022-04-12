@@ -16,27 +16,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package errors
+package errors_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/donyori/gocorenlp/errors"
+)
 
 // TestExportStdErrors is trivial.
 // It ensures that none of the four functions exported from
 // the standard package errors are missing.
 func TestExportStdErrors(t *testing.T) {
 	errorMsg := "probably not exported from standard package errors"
-	err1 := New("test error 1")
+	err1 := errors.New("test error 1")
 	if err1 == nil {
 		t.Fatal(`New("test error 1") - got nil;`, errorMsg)
 	}
 	err2 := &testError{Msg: "test error 2"}
-	if err := Unwrap(err1); err != nil {
+	if err := errors.Unwrap(err1); err != nil {
 		t.Errorf("Unwrap(err1) - got %v; %s", err, errorMsg)
 	}
-	if Is(err1, err2) {
+	if errors.Is(err1, err2) {
 		t.Error("Is(err1, err2) - got true;", errorMsg)
 	}
-	if As(err1, &err2) {
+	if errors.As(err1, &err2) {
 		t.Error("As(err1, err2) - got true;", errorMsg)
 	}
 }

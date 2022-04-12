@@ -16,20 +16,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package client
+package client_test
 
 import (
 	"fmt"
 	"time"
 
+	"github.com/donyori/gocorenlp/client"
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
-func Example_new_client() {
+func Example_newClient() {
 	// Before creating the client with default settings,
 	// launch a Stanford CoreNLP server listening on 127.0.0.1:9000.
 
-	c, err := New(nil) // Create a new client with default settings.
+	c, err := client.New(nil) // Create a new client with default settings.
 	if err != nil {
 		panic(err) // handle error
 	}
@@ -53,12 +54,12 @@ func Example_new_client() {
 	fmt.Println(doc.GetText())
 }
 
-func Example_specify_options() {
+func Example_specifyOptions() {
 	// Before creating the client,
 	// launch a Stanford CoreNLP server listening on the specified address.
 	// The default address is 127.0.0.1:9000.
 
-	c, err := New(&Options{
+	c, err := client.New(&client.Options{
 		Hostname:   "localhost", // Set the hostname here. If omitted, 127.0.0.1 will be used.
 		Port:       8080,        // Set the port number here. If omitted, 9000 will be used.
 		StatusPort: 8081,        // Set the port number of the status server here. If omitted, it will be the same as Port.

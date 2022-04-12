@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package errors
+package errors_test
 
 import (
 	"fmt"
@@ -28,6 +28,7 @@ import (
 	gogoerrors "github.com/donyori/gogo/errors"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
@@ -42,7 +43,7 @@ func TestIsTimeoutError(t *testing.T) {
 		{err: testWrapError(gogoerrors.AutoWrap(&testTimeoutError{false}))},
 		{err: testWrapError(gogoerrors.AutoWrap(&testTimeoutError{true})), want: true},
 	}
-	testIsErrorFunc(t, IsTimeoutError, testCases)
+	testIsErrorFunc(t, errors.IsTimeoutError, testCases)
 }
 
 func TestIsFileError(t *testing.T) {
@@ -58,7 +59,7 @@ func TestIsFileError(t *testing.T) {
 		{err: gogoerrors.AutoWrap(pathErr), want: true},
 		{err: testWrapError(gogoerrors.AutoWrap(pathErr)), want: true},
 	}
-	testIsErrorFunc(t, IsFileError, testCases)
+	testIsErrorFunc(t, errors.IsFileError, testCases)
 }
 
 func TestIsConnectionError(t *testing.T) {
@@ -74,11 +75,11 @@ func TestIsConnectionError(t *testing.T) {
 		{err: gogoerrors.AutoWrap(urlErr), want: true},
 		{err: testWrapError(gogoerrors.AutoWrap(urlErr)), want: true},
 	}
-	testIsErrorFunc(t, IsConnectionError, testCases)
+	testIsErrorFunc(t, errors.IsConnectionError, testCases)
 }
 
 func TestIsUnacceptableResponseError(t *testing.T) {
-	upe := &UnacceptableResponseError{
+	upe := &errors.UnacceptableResponseError{
 		StatusCode: http.StatusNotFound,
 		Status:     "404 Not Found (test status)",
 		ReadError:  nil,
@@ -92,11 +93,11 @@ func TestIsUnacceptableResponseError(t *testing.T) {
 		{err: gogoerrors.AutoWrap(upe), want: true},
 		{err: testWrapError(gogoerrors.AutoWrap(upe)), want: true},
 	}
-	testIsErrorFunc(t, IsUnacceptableResponseError, testCases)
+	testIsErrorFunc(t, errors.IsUnacceptableResponseError, testCases)
 }
 
 func TestIsProtoBufError(t *testing.T) {
-	pe := &ProtoBufError{
+	pe := &errors.ProtoBufError{
 		Op:   "test",
 		Type: "test_type",
 		Err:  gogoerrors.New("ProtoBuf error"),
@@ -108,7 +109,7 @@ func TestIsProtoBufError(t *testing.T) {
 		{err: gogoerrors.AutoWrap(pe), want: true},
 		{err: testWrapError(gogoerrors.AutoWrap(pe)), want: true},
 	}
-	testIsErrorFunc(t, IsProtoBufError, testCases)
+	testIsErrorFunc(t, errors.IsProtoBufError, testCases)
 }
 
 func TestNewProtoBufError(t *testing.T) {
@@ -145,7 +146,7 @@ func TestNewProtoBufError(t *testing.T) {
 		for _, tw := range typeWantCases {
 			for _, ue := range []error{nil, underlyingErr} {
 				t.Run(fmt.Sprintf("op=%s&v type=%s&err=%v", op, tw.showName, ue), func(t *testing.T) {
-					pe := NewProtoBufError(op, tw.v, ue)
+					pe := errors.NewProtoBufError(op, tw.v, ue)
 					if pe == nil {
 						t.Fatal("got nil")
 					}

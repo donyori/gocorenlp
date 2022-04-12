@@ -16,12 +16,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package model
+package model_test
 
 import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/donyori/gocorenlp/model"
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
@@ -62,7 +63,7 @@ func ExampleDecodeResponseBody() {
 	b := RetrieveRespBody()
 
 	doc := new(pb.Document)
-	err := DecodeResponseBody(b, doc)
+	err := model.DecodeResponseBody(b, doc)
 	if err != nil {
 		panic(err) // handle error
 	}
