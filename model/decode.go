@@ -42,8 +42,7 @@ import (
 // For more information about the wire encoding, see
 // <https://developers.google.com/protocol-buffers/docs/encoding>.
 func DecodeMessage(b []byte, msg proto.Message) error {
-	err := proto.Unmarshal(b, msg)
-	if err != nil {
+	if err := proto.Unmarshal(b, msg); err != nil {
 		return gogoerrors.AutoWrap(errors.NewProtoBufError(
 			"google.golang.org/protobuf/proto.Unmarshal",
 			msg,

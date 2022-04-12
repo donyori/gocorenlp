@@ -86,8 +86,7 @@ func testAnnotateRawFunc(t *testing.T, f func() *clientImpl) {
 			t.Errorf("got written %d; want %d", written, n)
 		}
 		doc := new(pb.Document)
-		err = model.DecodeResponseBody(b.Bytes(), doc)
-		if err != nil {
+		if err = model.DecodeResponseBody(b.Bytes(), doc); err != nil {
 			testLogErrorChain(t, err)
 			return nil
 		}

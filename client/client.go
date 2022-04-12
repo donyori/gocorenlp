@@ -154,8 +154,7 @@ type Client interface {
 // in opt before calling this function.
 func New(opt *Options) (c Client, err error) {
 	t := newClientImpl(opt)
-	err = t.Live()
-	if err != nil {
+	if err := t.Live(); err != nil {
 		return nil, gogoerrors.AutoWrap(err)
 	}
 	return t, nil
@@ -284,8 +283,7 @@ func (c *clientImpl) Ready() error {
 // a runtime error will occur.
 func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 	var b bytes.Buffer
-	_, err := c.AnnotateRaw(input, annotators, &b)
-	if err != nil {
+	if _, err := c.AnnotateRaw(input, annotators, &b); err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
 	// Parse ProtoBuf message.
