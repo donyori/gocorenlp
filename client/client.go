@@ -114,6 +114,25 @@ type Client interface {
 	// It returns the number of bytes written and any error encountered.
 	AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error)
 
+	// AnnotateStringRaw sends an annotation request with
+	// the specified text and annotators.
+	// Then AnnotateStringRaw writes the response body to
+	// the specified writer without parsing.
+	// The user can parse it later using the function
+	// github.com/donyori/gocorenlp/model.DecodeResponseBody.
+	//
+	// If no annotators are specified,
+	// the client's default annotators will be used.
+	// If the client's annotators are also not specified,
+	// the server's default annotators will be used.
+	//
+	// The annotators are separated by commas (,) in the string without spaces.
+	// For example:
+	//  "tokenize,ssplit,pos,depparse"
+	//
+	// It returns the number of bytes written and any error encountered.
+	AnnotateStringRaw(text string, annotators string, output io.Writer) (written int64, err error)
+
 	// Shutdown sends a shutdown request with the specified key
 	// to stop the target server.
 	//

@@ -55,26 +55,23 @@ const (
 
 func TestNew(t *testing.T) {
 	const skipFormat = "server 127.0.0.1:%d is offline; skip this test"
-	var isServersOnline [PortNum]bool
-	for i := 0; i < PortNum; i++ {
-		isServersOnline[i] = IsServerListeningOnPort(ServerPorts[i])
-	}
 	for i, name := range SubtestNames {
 		t.Run(name, func(t *testing.T) {
 			var c client.Client
 			var err error
 			switch i {
 			case DefaultIdx:
-				if !isServersOnline[DefaultPortIndex] {
-					t.Skipf(skipFormat, ServerPorts[DefaultPortIndex])
+				port := ServerPorts[DefaultPortIndex]
+				if !CheckIsServerListeningOnPort(port) {
+					t.Skipf(skipFormat, port)
 				}
 				c, err = client.New(nil)
 			case DiffStatusIndex:
 				mainPort, statusPort := ServerPorts[DiffStatusMainPortIndex], ServerPorts[DiffStatusStatusPortIndex]
-				if !isServersOnline[DiffStatusMainPortIndex] {
+				if !CheckIsServerListeningOnPort(mainPort) {
 					t.Skipf(skipFormat, mainPort)
 				}
-				if !isServersOnline[DiffStatusStatusPortIndex] {
+				if !CheckIsServerListeningOnPort(statusPort) {
 					t.Skipf(skipFormat, statusPort)
 				}
 				c, err = client.New(&client.Options{
@@ -83,7 +80,7 @@ func TestNew(t *testing.T) {
 				})
 			case UserIndex:
 				port := ServerPorts[UserPortIndex]
-				if !isServersOnline[UserPortIndex] {
+				if !CheckIsServerListeningOnPort(port) {
 					t.Skipf(skipFormat, port)
 				}
 				c, err = client.New(&client.Options{
@@ -105,13 +102,13 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// IsServerListeningOnPort checks whether a local server
+// CheckIsServerListeningOnPort checks whether a local server
 // is listening on the specified port.
-func IsServerListeningOnPort(port uint16) bool {
+func CheckIsServerListeningOnPort(port uint16) bool {
 	conn, err := net.DialTimeout(
 		"tcp",
 		"127.0.0.1:"+strconv.FormatUint(uint64(port), 10),
-		time.Millisecond*10,
+		time.Millisecond*30,
 	)
 	if err != nil {
 		return false

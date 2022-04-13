@@ -46,10 +46,8 @@ import (
 	"bytes"
 	"fmt"
 	"net"
-	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -88,8 +86,15 @@ var NonShutdownSubtestNames = [NonShutdownNum]string{"default", "diff status", "
 var ShutdownSubtestNames = [N - NonShutdownNum]string{"no server ID", "server ID"}
 var ServerIds = [N]string{"testdefault", "testdiffstatus", "testuser", "", "testshutdown"}
 
-var IsServersOnline [PortNum]bool
 var ServerPorts = [PortNum]uint16{9000, 9100, 9101, 9200, 9300, 9301}
+
+var IndexPortMap = map[int]uint16{
+	DefaultIndex:            ServerPorts[DefaultPortIndex],
+	DiffStatusIndex:         ServerPorts[DiffStatusMainPortIndex],
+	UserIndex:               ServerPorts[UserPortIndex],
+	ShutdownNoServerIdIndex: ServerPorts[ShutdownNoServerIdPortIndex],
+	ShutdownServerIdIndex:   ServerPorts[ShutdownServerIdPortIndex],
+}
 
 const (
 	Username = "user1"
@@ -99,8 +104,6 @@ const (
 const Text = "The quick brown fox jumped over the lazy dog."
 
 const InvalidIndexFormat = "invalid index %d; should be [0-%d]"
-
-var CheckServerOnlineOnce sync.Once
 
 func TestClientImpl_Live(t *testing.T) {
 	for i, name := range NonShutdownSubtestNames {
@@ -144,11 +147,11 @@ func TestClientImpl_Annotate(t *testing.T) {
 	for i, name := range NonShutdownSubtestNames {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
-			AnnotateMethodsFunc(t, func(tb testing.TB, annotators string) *pb.Document {
-				c := NewClientImpl(tb, i)
+			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
+				c := NewClientImpl(t, i)
 				doc := new(pb.Document)
 				if err := c.Annotate(strings.NewReader(Text), annotators, doc); err != nil {
-					tb.Error(err)
+					t.Error(err)
 					return nil
 				}
 				return doc
@@ -161,8 +164,8 @@ func TestClientImpl_AnnotateString(t *testing.T) {
 	for i, name := range NonShutdownSubtestNames {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
-			AnnotateMethodsFunc(t, func(tb testing.TB, annotators string) *pb.Document {
-				c := NewClientImpl(tb, i)
+			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
+				c := NewClientImpl(t, i)
 				doc := new(pb.Document)
 				if err := c.AnnotateString(Text, annotators, doc); err != nil {
 					t.Error(err)
@@ -178,10 +181,37 @@ func TestClientImpl_AnnotateRaw(t *testing.T) {
 	for i, name := range NonShutdownSubtestNames {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
-			AnnotateMethodsFunc(t, func(tb testing.TB, annotators string) *pb.Document {
+			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
 				c := NewClientImpl(t, i)
 				var b bytes.Buffer
 				written, err := c.AnnotateRaw(strings.NewReader(Text), annotators, &b)
+				if err != nil {
+					t.Error(err)
+					return nil
+				}
+				if n := int64(b.Len()); written != n {
+					t.Errorf("got written %d; want %d", written, n)
+					return nil
+				}
+				doc := new(pb.Document)
+				if err = model.DecodeResponseBody(b.Bytes(), doc); err != nil {
+					t.Error(err)
+					return nil
+				}
+				return doc
+			})
+		})
+	}
+}
+
+func TestClientImpl_AnnotateStringRaw(t *testing.T) {
+	for i, name := range NonShutdownSubtestNames {
+		t.Run(name, func(t *testing.T) {
+			SkipIfServerOffline(t, i)
+			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
+				c := NewClientImpl(t, i)
+				var b bytes.Buffer
+				written, err := c.AnnotateStringRaw(Text, annotators, &b)
 				if err != nil {
 					t.Error(err)
 					return nil
@@ -214,37 +244,6 @@ func TestClientImpl_ShutdownLocal(t *testing.T) {
 	}
 }
 
-func TestMain(m *testing.M) {
-	CheckAllServerOnline()
-	os.Exit(m.Run())
-}
-
-// CheckAllServerOnline checks all the servers whether they are online.
-//
-// It only takes effect once.
-func CheckAllServerOnline() {
-	CheckServerOnlineOnce.Do(func() {
-		for i := 0; i < PortNum; i++ {
-			IsServersOnline[i] = CheckIsServerListeningOnPort(ServerPorts[i])
-		}
-	})
-}
-
-// CheckIsServerListeningOnPort checks whether a local server
-// is listening on the specified port.
-func CheckIsServerListeningOnPort(port uint16) bool {
-	conn, err := net.DialTimeout(
-		"tcp",
-		"127.0.0.1:"+strconv.FormatUint(uint64(port), 10),
-		time.Millisecond*10,
-	)
-	if err != nil {
-		return false
-	}
-	_ = conn.Close() // ignore error
-	return true
-}
-
 // IsServerOnline reports whether the server is online.
 //
 // It determines the server according to the specified test index
@@ -254,26 +253,17 @@ func CheckIsServerListeningOnPort(port uint16) bool {
 //
 // It calls tb.Fatalf if the index is out of range.
 func IsServerOnline(tb testing.TB, index int, mainServer bool) bool {
-	CheckAllServerOnline()
-	switch index {
-	case DefaultIndex:
-		return IsServersOnline[DefaultPortIndex]
-	case DiffStatusIndex:
-		if mainServer {
-			return IsServersOnline[DiffStatusMainPortIndex]
-		}
-		return IsServersOnline[DiffStatusStatusPortIndex]
-	case UserIndex:
-		return IsServersOnline[UserPortIndex]
-	case ShutdownNoServerIdIndex:
-		return IsServersOnline[ShutdownNoServerIdPortIndex]
-	case ShutdownServerIdIndex:
-		return IsServersOnline[ShutdownServerIdPortIndex]
-	default:
+	if index < 0 || index > N {
 		tb.Fatalf(InvalidIndexFormat, index, N)
 	}
-	// unreachable
-	return false
+	port, ok := IndexPortMap[index]
+	if !ok {
+		tb.Fatalf("cannot find port with key %d in IndexPortMap", index)
+	}
+	if index == DiffStatusIndex && !mainServer {
+		port = ServerPorts[DiffStatusStatusPortIndex]
+	}
+	return CheckIsServerListeningOnPort(port)
 }
 
 // SkipIfServerOffline skips the test if the server is offline.
@@ -282,24 +272,8 @@ func IsServerOnline(tb testing.TB, index int, mainServer bool) bool {
 //
 // It calls tb.Fatalf if the index is out of range.
 func SkipIfServerOffline(tb testing.TB, index int) {
-	CheckAllServerOnline()
-	var portIdx int
-	switch index {
-	case DefaultIndex:
-		portIdx = DefaultPortIndex
-	case DiffStatusIndex:
-		portIdx = DiffStatusMainPortIndex
-	case UserIndex:
-		portIdx = UserPortIndex
-	case ShutdownNoServerIdIndex:
-		portIdx = ShutdownNoServerIdPortIndex
-	case ShutdownServerIdIndex:
-		portIdx = ShutdownServerIdPortIndex
-	default:
-		tb.Fatalf(InvalidIndexFormat, index, N)
-	}
-	if !IsServersOnline[portIdx] {
-		tb.Skipf("server 127.0.0.1:%d is offline; skip this test", ServerPorts[portIdx])
+	if !IsServerOnline(tb, index, true) {
+		tb.Skipf("server 127.0.0.1:%d is offline; skip this test", IndexPortMap[index])
 	}
 }
 
@@ -336,22 +310,37 @@ func NewClientImpl(tb testing.TB, index int) *clientImpl {
 		tb.Fatalf(InvalidIndexFormat, index, N)
 	}
 	opt.Annotators = "tokenize,ssplit,pos"
-	opt.Timeout = time.Millisecond * 300
+	opt.Timeout = time.Millisecond * 600
 	return newClientImpl(opt)
 }
 
 // AnnotateMethodsFunc encapsulates common code for testing the methods
-// Annotate, AnnotateString, and AnnotateRaw of *clientImpl.
-func AnnotateMethodsFunc(t *testing.T, f func(tb testing.TB, annotators string) *pb.Document) {
+// Annotate, AnnotateString, AnnotateRaw, and AnnotateStringRaw of *clientImpl.
+func AnnotateMethodsFunc(t *testing.T, f func(annotators string) *pb.Document) {
 	annotators := []string{"", "tokenize,ssplit,pos"}
 	for _, ann := range annotators {
 		t.Run(fmt.Sprintf("annotator=%q", ann), func(t *testing.T) {
-			doc := f(t, ann)
+			doc := f(ann)
 			if doc != nil {
 				CheckAnnotation(t, doc)
 			}
 		})
 	}
+}
+
+// CheckIsServerListeningOnPort checks whether a local server
+// is listening on the specified port.
+func CheckIsServerListeningOnPort(port uint16) bool {
+	conn, err := net.DialTimeout(
+		"tcp",
+		"127.0.0.1:"+strconv.FormatUint(uint64(port), 10),
+		time.Millisecond*30,
+	)
+	if err != nil {
+		return false
+	}
+	_ = conn.Close() // ignore error
+	return true
 }
 
 // CheckAnnotation checks the result of annotation to the text:
