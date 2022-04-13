@@ -76,27 +76,37 @@ func ExampleDecodeResponseBody() {
 	// Work with doc.
 	// Here, we print the original text.
 	// And then print the tokens in the last sentence
-	// along with their part-of-speech tags.
+	// into a table along with their part-of-speech tags.
+	fmt.Println("Text:")
 	fmt.Println(doc.GetText())
 	sentences := doc.GetSentence()
 	if len(sentences) == 0 {
-		panic("doc.GetSentence() returned an empty slice") // should not happen
+		panic("doc.GetSentence returned an empty slice") // should not happen
 	}
 	tokens := sentences[len(sentences)-1].GetToken()
+	fmt.Println("+------+-----+")
+	fmt.Println("| Word | POS |")
+	fmt.Println("+------+-----+")
 	for _, token := range tokens {
-		fmt.Printf("%s\t%s\n", token.GetWord(), token.GetPos())
+		fmt.Printf("| %-5s| %-4s|\n", token.GetWord(), token.GetPos())
 	}
+	fmt.Println("+------+-----+")
 
 	// Output:
+	// Text:
 	//
 	// Roses are red.
 	//   Violets are blue.
 	// Sugar is sweet.
 	//   And so are you.
 	//
-	// And	CC
-	// so	RB
-	// are	VBP
-	// you	PRP
-	// .	.
+	// +------+-----+
+	// | Word | POS |
+	// +------+-----+
+	// | And  | CC  |
+	// | so   | RB  |
+	// | are  | VBP |
+	// | you  | PRP |
+	// | .    | .   |
+	// +------+-----+
 }
