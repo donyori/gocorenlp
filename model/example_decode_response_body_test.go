@@ -62,12 +62,30 @@ func ExampleDecodeResponseBody() {
 	// Retrieve the Stanford CoreNLP server response body.
 	b := RetrieveRespBody()
 
+	// Specify the document model.
+	// Depending on your CoreNLP version, import the appropriate model.
+	// See the documentation for this package for details.
 	doc := new(pb.Document)
+
+	// Decode the response body and place the result in doc.
 	err := model.DecodeResponseBody(b, doc)
 	if err != nil {
 		panic(err) // handle error
 	}
+
+	// Work with doc.
+	// Here, we print the original text.
+	// And then print the tokens in the last sentence
+	// along with their part-of-speech tags.
 	fmt.Println(doc.GetText())
+	sentences := doc.GetSentence()
+	if len(sentences) == 0 {
+		panic("doc.GetSentence() returned an empty slice") // should not happen
+	}
+	tokens := sentences[len(sentences)-1].GetToken()
+	for _, token := range tokens {
+		fmt.Printf("%s\t%s\n", token.GetWord(), token.GetPos())
+	}
 
 	// Output:
 	//
@@ -76,4 +94,9 @@ func ExampleDecodeResponseBody() {
 	// Sugar is sweet.
 	//   And so are you.
 	//
+	// And	CC
+	// so	RB
+	// are	VBP
+	// you	PRP
+	// .	.
 }

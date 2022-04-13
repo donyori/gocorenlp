@@ -98,14 +98,19 @@ type Options struct {
 	onlyKeyedLiterals struct{}
 }
 
-// makeHosts generates the hosts (including the hostname part and
-// the port number part) for the main server and status server
-// from the specified hostname, port, and statusPort.
-func makeHosts(hostname string, port, statusPort uint16) (host, statusHost string) {
-	hostname = strings.TrimSpace(hostname)
+// GetHosts returns the hosts (including the hostname part and
+// the port number part) for the main server and status server.
+func (opt *Options) GetHosts() (main, status string) {
+	if opt == nil {
+		main = "127.0.0.1:9000"
+		status = main
+		return
+	}
+	hostname := strings.TrimSpace(opt.Hostname)
 	if len(hostname) == 0 {
 		hostname = "127.0.0.1"
 	}
+	port, statusPort := opt.Port, opt.StatusPort
 	if port == 0 {
 		port = 9000
 	}
@@ -114,21 +119,21 @@ func makeHosts(hostname string, port, statusPort uint16) (host, statusHost strin
 	}
 	if addr, err := netip.ParseAddr(hostname); err == nil {
 		// hostname is an IP address.
-		host = netip.AddrPortFrom(addr, port).String()
+		main = netip.AddrPortFrom(addr, port).String()
 		if statusPort == port {
-			statusHost = host
+			status = main
 		} else {
-			statusHost = netip.AddrPortFrom(addr, statusPort).String()
+			status = netip.AddrPortFrom(addr, statusPort).String()
 		}
 	} else {
 		// hostname is not an IP address, may be a domain name, or invalid.
 		// This function does not validate the host.
 		// So simply join the hostname and port.
-		host = hostname + ":" + strconv.FormatUint(uint64(port), 10)
+		main = hostname + ":" + strconv.FormatUint(uint64(port), 10)
 		if statusPort == port {
-			statusHost = host
+			status = main
 		} else {
-			statusHost = hostname + ":" + strconv.FormatUint(uint64(statusPort), 10)
+			status = hostname + ":" + strconv.FormatUint(uint64(statusPort), 10)
 		}
 	}
 	return

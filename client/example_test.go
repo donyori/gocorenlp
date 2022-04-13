@@ -67,12 +67,12 @@ func Example_specifyOptions() {
 	// The default address is 127.0.0.1:9000.
 
 	c, err := client.New(&client.Options{
-		Hostname:   "localhost", // Set the hostname here. If omitted, 127.0.0.1 will be used.
+		Hostname:   "localhost", // Set the hostname here. If omitted, "127.0.0.1" will be used.
 		Port:       8080,        // Set the port number here. If omitted, 9000 will be used.
 		StatusPort: 8081,        // Set the port number of the status server here. If omitted, it will be the same as Port.
 
 		Timeout:    time.Second * 15,      // Set a timeout for each request here.
-		Charset:    "utf-8",               // Set the charset of your text here. If omitted, utf-8 will be used.
+		Charset:    "utf-8",               // Set the charset of your text here. If omitted, "utf-8" will be used.
 		Annotators: "tokenize,ssplit,pos", // Set the default annotators here.
 
 		// Set the username and password here
