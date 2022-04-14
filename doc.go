@@ -17,4 +17,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package gocorenlp provides a Go (Golang) client for Stanford CoreNLP server.
+//
+// Please start with its subpackage client.
 package gocorenlp
