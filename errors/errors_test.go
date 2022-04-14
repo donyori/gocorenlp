@@ -37,6 +37,8 @@ import (
 var PackageSimpleName string
 
 func init() {
+	// Dynamically get the package name to avoid inappropriate test cases,
+	// particularly when moving the test to another package.
 	pkg, _, ok := runtime.CallerPkgFunc(0)
 	if !ok {
 		panic("failed to retrieve package name")

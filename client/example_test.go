@@ -20,11 +20,46 @@ package client_test
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/donyori/gocorenlp/client"
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
+
+func Example() {
+	// This example is a simple procedure of annotating the string
+	//  "The quick brown fox jumped over the lazy dog."
+	// with Stanford CoreNLP.
+
+	// Before calling client.AnnotateString,
+	// launch a Stanford CoreNLP server listening on 127.0.0.1:9000.
+
+	text := "The quick brown fox jumped over the lazy dog."
+	annotators := "tokenize,ssplit,pos"
+
+	// Specify the document model.
+	// Depending on your CoreNLP version, import the appropriate model.
+	// See package github.com/donyori/gocorenlp/model for details.
+	doc := new(pb.Document)
+
+	// Annotate the text with the specified annotators
+	// and store the result in doc.
+	err := client.AnnotateString(text, annotators, doc)
+	if err != nil {
+		panic(err) // handle error
+	}
+
+	// Work with the document.
+	fmt.Println(doc.GetText())
+
+	// [Optional]
+	// Shut down the server.
+	err = client.Shutdown()
+	if err != nil {
+		panic(err) // handle error
+	}
+}
 
 func Example_newClient() {
 	// Before creating the client with default settings,
@@ -80,7 +115,10 @@ func Example_specifyOptions() {
 		Username: "Alice",
 		Password: "Alice's password",
 
-		ServerId: "CoreNLPServer", // If your server has a server ID, set it here.
+		// If your server has a server ID
+		// (i.e., server name, set by -server_id),
+		// set it here.
+		ServerId: "CoreNLPServer",
 	})
 	if err != nil {
 		panic(err) // handle error
@@ -102,4 +140,43 @@ func Example_specifyOptions() {
 
 	// Work with the document.
 	fmt.Println(doc.GetText())
+}
+
+func Example_cacheAnnotation() {
+	// In this example, we cache the response from the Stanford CoreNLP server
+	// into a local file for future use.
+
+	// Before calling client.AnnotateStringRaw,
+	// launch a Stanford CoreNLP server listening on 127.0.0.1:9000.
+
+	text := "The quick brown fox jumped over the lazy dog."
+	annotators := "tokenize,ssplit,pos"
+
+	// Open a file to save the annotation result.
+	filename := "./annotation.ann"
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err) // handle error
+	}
+	defer f.Close()
+
+	// Annotate the text with the specified annotators
+	// and store the result in f.
+	_, err = client.AnnotateStringRaw(text, annotators, f)
+	if err != nil {
+		panic(err) // handle error
+	}
+
+	// Then you can use the annotation by reading it from the file.
+	//
+	// Note that the data written to the file is in ProtoBuf wire encoding.
+	// You can decode it using the function
+	// github.com/donyori/gocorenlp/model.DecodeResponseBody.
+
+	// [Optional]
+	// Shut down the server.
+	err = client.Shutdown()
+	if err != nil {
+		panic(err) // handle error
+	}
 }

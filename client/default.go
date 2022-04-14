@@ -113,7 +113,7 @@ func Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 //
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
-func AnnotateString(text string, annotators string, outDoc proto.Message) error {
+func AnnotateString(text, annotators string, outDoc proto.Message) error {
 	return gogoerrors.AutoWrap(defaultClient.AnnotateString(text, annotators, outDoc))
 }
 
@@ -160,7 +160,7 @@ func AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written 
 //  "tokenize,ssplit,pos,depparse"
 //
 // It returns the number of bytes written and any error encountered.
-func AnnotateStringRaw(text string, annotators string, output io.Writer) (written int64, err error) {
+func AnnotateStringRaw(text, annotators string, output io.Writer) (written int64, err error) {
 	written, err = defaultClient.AnnotateStringRaw(text, annotators, output)
 	return written, gogoerrors.AutoWrap(err)
 }

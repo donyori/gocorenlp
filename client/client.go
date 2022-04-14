@@ -94,7 +94,7 @@ type Client interface {
 	//
 	// If outDoc is nil or not a pointer to Document,
 	// a runtime error will occur.
-	AnnotateString(text string, annotators string, outDoc proto.Message) error
+	AnnotateString(text, annotators string, outDoc proto.Message) error
 
 	// AnnotateRaw sends an annotation request with the specified annotators
 	// to annotate the data read from the specified reader.
@@ -131,7 +131,7 @@ type Client interface {
 	//  "tokenize,ssplit,pos,depparse"
 	//
 	// It returns the number of bytes written and any error encountered.
-	AnnotateStringRaw(text string, annotators string, output io.Writer) (written int64, err error)
+	AnnotateStringRaw(text, annotators string, output io.Writer) (written int64, err error)
 
 	// Shutdown sends a shutdown request with the specified key
 	// to stop the target server.
