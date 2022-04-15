@@ -61,6 +61,10 @@ package model
 // Note that do not use any filename patterns or path patterns (e.g., *.proto).
 // Patterns may cause errors or unexpected behavior on different platforms.
 //
-//go:generate protoc --proto_path=v3.3.0-5ce4cf67846b/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v3_3_0_5ce4cf67846b.proto
-//go:generate protoc --proto_path=v3.6.0-29765338a2e8/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v3.6.0-29765338a2e8.proto
+//go:generate protoc --proto_path=v3.6.0-29765338a2e8/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v3_6_0_29765338a2e8.proto
+//go:generate protoc --proto_path=v4.0.0-2b3dd38abe00/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_0_0_2b3dd38abe00.proto
+//go:generate protoc --proto_path=v4.1.0-a1427196ba6e/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_1_0_a1427196ba6e.proto
+//go:generate protoc --proto_path=v4.2.0-3ad83fc2e42e/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_2_0_3ad83fc2e42e.proto
+//go:generate protoc --proto_path=v4.2.1-d8d09b2c81a5/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_2_1_d8d09b2c81a5.proto
+//go:generate protoc --proto_path=v4.3.0-f885cd198767/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_3_0_f885cd198767.proto
 //go:generate protoc --proto_path=v4.4.0-e90f30f13c40/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_4_0_e90f30f13c40.proto

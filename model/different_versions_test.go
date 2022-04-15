@@ -22,6 +22,11 @@ import (
 	"testing"
 
 	pb360 "github.com/donyori/gocorenlp/model/v3.6.0-29765338a2e8/pb"
+	pb400 "github.com/donyori/gocorenlp/model/v4.0.0-2b3dd38abe00/pb"
+	pb410 "github.com/donyori/gocorenlp/model/v4.1.0-a1427196ba6e/pb"
+	pb420 "github.com/donyori/gocorenlp/model/v4.2.0-3ad83fc2e42e/pb"
+	pb421 "github.com/donyori/gocorenlp/model/v4.2.1-d8d09b2c81a5/pb"
+	pb430 "github.com/donyori/gocorenlp/model/v4.3.0-f885cd198767/pb"
 	pb440 "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
@@ -30,5 +35,10 @@ import (
 
 func TestDifferentVersions(t *testing.T) {
 	var _ *pb360.Document
+	var _ *pb400.Document
+	var _ *pb410.Document
+	var _ *pb420.Document
+	var _ *pb421.Document
+	var _ *pb430.Document
 	var _ *pb440.Document
 }

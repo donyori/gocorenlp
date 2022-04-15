@@ -17,20 +17,21 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //
-// This file defines the ProtoBuf messages used by Stanford CoreNLP 4.4.0.
+// This file defines the ProtoBuf messages used by
+// Stanford CoreNLP 4.3.0, 4.3.1, and 4.3.2.
 //
 
 syntax = "proto2";
 
-package com.github.donyori.gocorenlp.model.v4_4_0_e90f30f13c40;
+package com.github.donyori.gocorenlp.model.v4_3_0_f885cd198767;
 
-option go_package = "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb";
+option go_package = "github.com/donyori/gocorenlp/model/v4.3.0-f885cd198767/pb";
 
 //
 // This file is edited from "edu.stanford.nlp.pipeline.CoreNLP.proto"
 // retrieved from GitHub:
-// <https://github.com/stanfordnlp/CoreNLP/blob/v4.4.0/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
-// The commit hash at retrieval is e90f30f13c40fc00c41f67d48900c8760453c046.
+// <https://github.com/stanfordnlp/CoreNLP/blob/v4.3.0/src/edu/stanford/nlp/pipeline/CoreNLP.proto>.
+// The commit hash at retrieval is f885cd198767219875f08479d3819493bacc8637.
 //
 // To compile this file to Go, see "doc.go" in package model.
 //
@@ -747,21 +748,4 @@ message EvaluateParserRequest {
 
 message EvaluateParserResponse {
   required double              f1             = 1;
-  optional double              kbestF1        = 2;
-}
-
-
-// A protobuf for running Tsurgeon operations on constituency trees
-message TsurgeonRequest {
-  message Operation {
-    required string                tregex         = 1;
-    repeated string                tsurgeon       = 2;
-  }
-  repeated Operation               operations     = 1;
-  repeated FlattenedParseTree      trees          = 2;
-}
-
-// The results of the Tsurgeon operation
-message TsurgeonResponse {
-  repeated FlattenedParseTree      trees          = 1;
 }
