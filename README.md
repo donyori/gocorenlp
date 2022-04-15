@@ -217,12 +217,19 @@ _, err = client.AnnotateStringRaw(text, annotators, f)
 if err != nil {
 	panic(err) // handle error
 }
-
 // Then you can use the annotation by reading it from the file.
-//
-// Note that the data written to the file is in ProtoBuf wire encoding.
-// You can decode it using the function
-// github.com/donyori/gocorenlp/model.DecodeResponseBody.
+```
+
+`AnnotateRaw` and `AnnotateStringRaw` output data without parsing.
+You can decode it into the document model by function `DecodeResponseBody`
+in our package `model`:
+
+```go
+doc := new(pb.Document)
+err := model.DecodeResponseBody(data, doc) // data is that output by AnnotateRaw or AnnotateStringRaw
+if err != nil {
+	panic(err) // handle error
+}
 ```
 
 ---
@@ -233,7 +240,7 @@ The CoreNLP server provides several forms to present annotation results,
 such as JSON, XML, and text. (See [this page](https://stanfordnlp.github.io/CoreNLP/corenlp-server.html#annotate-with-corenlp- "Annotate with CoreNLP: /") for details.)
 
 Our client asks the CoreNLP server to serialize the results in
-[Protocol Buffers (ProtoBuf)](https://developers.google.com/protocol-buffers).
+[Protocol Buffers (ProtoBuf)](https://developers.google.com/protocol-buffers "Protocol Buffers").
 
 At the current stage, we provide the models supporting
 CoreNLP 4.4.0 and CoreNLP 3.6.0.
@@ -271,8 +278,8 @@ For more documentation about this library, see on [*pkg.go.dev*](https://pkg.go.
 
 ## License
 
-The GNU Affero General Public License 3.0 (AGPL-3.0) - [Yuan Gao](https://github.com/donyori/).
-Please have a look at the [LICENSE](LICENSE).
+The GNU Affero General Public License 3.0 (AGPL-3.0) - [Yuan Gao](https://github.com/donyori "donyori (Yuan Gao)").
+Please have a look at the [LICENSE](LICENSE "GNU Affero General Public License v3.0").
 
 ## Contact
 

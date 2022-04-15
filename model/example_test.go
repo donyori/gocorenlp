@@ -26,7 +26,16 @@ import (
 	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
 
-const ExampleDataBase64 = `
+func ExampleDecodeResponseBody() {
+	// A base64 encoded response body.
+	// It carries the annotation of the text:
+	//
+	// Roses are red.
+	//   Violets are blue.
+	// Sugar is sweet.
+	//   And so are you.
+	//
+	respBodyBase64 := `
 jAcKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoSwQEKMQoFUm9zZXMSBE5OUFMaBVJv
 c2VzKgEKMgEgOgVSb3Nlc1gBYAaIAQCQAQGoAQCwAgAKKgoDYXJlEgNWQlAaA2Fy
@@ -48,19 +57,14 @@ GgN5b3UqASAyADoDeW91WEFgRIgBD5ABEKgBALACAAohCgEuEgEuGgEuKgAyAQo6
 AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 `
 
-func RetrieveRespBody() []byte {
+	// Retrieve the Stanford CoreNLP server response body.
+	//
 	// Here, we retrieve the response body from the base64 encoding string.
 	// You can retrieve it from where you saved it.
-	b, err := base64.StdEncoding.DecodeString(ExampleDataBase64)
+	b, err := base64.StdEncoding.DecodeString(respBodyBase64)
 	if err != nil {
-		panic(err)
+		panic(err) // handle error
 	}
-	return b
-}
-
-func ExampleDecodeResponseBody() {
-	// Retrieve the Stanford CoreNLP server response body.
-	b := RetrieveRespBody()
 
 	// Specify the document model.
 	// Depending on your CoreNLP version, import the appropriate model.
@@ -68,21 +72,23 @@ func ExampleDecodeResponseBody() {
 	doc := new(pb.Document)
 
 	// Decode the response body and place the result in doc.
-	err := model.DecodeResponseBody(b, doc)
+	err = model.DecodeResponseBody(b, doc)
 	if err != nil {
 		panic(err) // handle error
 	}
 
 	// Work with doc.
+	//
 	// Here, we print the original text.
 	// And then print the tokens in the last sentence
 	// into a table along with their part-of-speech tags.
-	fmt.Println("Text:")
+	fmt.Println("Original text:")
 	fmt.Println(doc.GetText())
 	sentences := doc.GetSentence()
 	if len(sentences) == 0 {
 		panic("doc.GetSentence returned an empty slice") // should not happen
 	}
+	fmt.Println("Last sentence tokens:")
 	tokens := sentences[len(sentences)-1].GetToken()
 	fmt.Println("+------+-----+")
 	fmt.Println("| Word | POS |")
@@ -93,13 +99,14 @@ func ExampleDecodeResponseBody() {
 	fmt.Println("+------+-----+")
 
 	// Output:
-	// Text:
+	// Original text:
 	//
 	// Roses are red.
 	//   Violets are blue.
 	// Sugar is sweet.
 	//   And so are you.
 	//
+	// Last sentence tokens:
 	// +------+-----+
 	// | Word | POS |
 	// +------+-----+

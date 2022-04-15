@@ -21,7 +21,6 @@ package model_test
 import (
 	"testing"
 
-	pb330 "github.com/donyori/gocorenlp/model/v3.3.0-5ce4cf67846b/pb"
 	pb360 "github.com/donyori/gocorenlp/model/v3.6.0-29765338a2e8/pb"
 	pb440 "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
 )
@@ -30,7 +29,6 @@ import (
 // different versions at the same time will not cause conflicts.
 
 func TestDifferentVersions(t *testing.T) {
-	var _ *pb330.Document
 	var _ *pb360.Document
 	var _ *pb440.Document
 }

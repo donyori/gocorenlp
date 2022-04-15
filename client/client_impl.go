@@ -32,6 +32,7 @@ import (
 	gogoerrors "github.com/donyori/gogo/errors"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model"
 )
 
@@ -97,12 +98,7 @@ func (c *clientImpl) Live() error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	_, _, err = checkResponse(
-		resp,
-		nil,
-		makeAcceptBodyEqualTrimSpace("live"),
-		"live",
-	)
+	_, _, err = checkResponse(resp, nil, nil, "live")
 	return gogoerrors.AutoWrap(err)
 }
 
@@ -122,12 +118,7 @@ func (c *clientImpl) Ready() error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	_, _, err = checkResponse(
-		resp,
-		nil,
-		makeAcceptBodyEqualTrimSpace("ready"),
-		"ready",
-	)
+	_, _, err = checkResponse(resp, nil, nil, "ready")
 	return gogoerrors.AutoWrap(err)
 }
 
@@ -303,12 +294,7 @@ func (c *clientImpl) Shutdown(key string) error {
 		return gogoerrors.AutoWrap(err)
 	}
 	wantBody := "Shutdown successful!"
-	_, _, err = checkResponse(
-		resp,
-		nil,
-		makeAcceptBodyEqualTrimSpace(wantBody),
-		wantBody,
-	)
+	_, _, err = checkResponse(resp, nil, nil, wantBody)
 	return gogoerrors.AutoWrap(err)
 }
 
@@ -332,3 +318,82 @@ func (c *clientImpl) ShutdownLocal() error {
 }
 
 func (c *clientImpl) private() {}
+
+// checkResponse checks the status and body of the specified HTTP response.
+//
+// acceptStatus is a function to check the response status.
+// Its two arguments are resp.StatusCode and resp.Status.
+// It returns a boolean value indicating whether the status is acceptable.
+// If it is nil, checkResponse accepts the status if the status code is 2XX.
+//
+// acceptBody is a function to check the response body.
+// Its argument is the response body.
+// It returns a boolean value indicating whether the body is acceptable.
+// If it is nil and wantBody is not empty,
+// checkResponse accepts the body if the body and wantBody are the same
+// after dropping leading and trailing white space.
+//
+// wantBody is the expected body of the response.
+// It will be stored in the returned error
+// if the response body is unacceptable.
+//
+// If acceptBody is non-nil or wantBody is non-empty,
+// or the status is unacceptable, checkResponse reads the response body
+// and closes the body reader; otherwise, checkResponse does nothing to
+// the body reader, neither reading nor closing it.
+//
+// checkResponse returns the response body (nil if not read it)
+// and an indicator read to report whether it has attempted to
+// read the response body.
+// If read is true, the body reader is closed by checkResponse.
+// It reports an error if the response is not as expected.
+// If the returned error is non-nil, it is of type
+// *github.com/donyori/gocorenlp/errors.UnacceptableResponseError.
+func checkResponse(
+	resp *http.Response,
+	acceptStatus func(statusCode int, status string) bool,
+	acceptBody func(body []byte) bool,
+	wantBody string,
+) (body []byte, read bool, err error) {
+	if acceptStatus == nil {
+		acceptStatus = func(statusCode int, _ string) bool {
+			return statusCode >= 200 && statusCode < 300
+		}
+	}
+	if acceptBody == nil && len(wantBody) > 0 {
+		acceptBody = func(body []byte) bool {
+			return strings.TrimSpace(string(body)) == strings.TrimSpace(wantBody)
+		}
+	}
+	respErr := new(errors.UnacceptableResponseError)
+	statusCode, status := resp.StatusCode, resp.Status
+	if !acceptStatus(statusCode, status) {
+		respErr.StatusCode, respErr.Status = statusCode, status
+		err = respErr
+	} else if acceptBody == nil {
+		return
+	}
+	defer closeIgnoreError(resp.Body)
+	read = true
+	body, respErr.ReadError = io.ReadAll(resp.Body)
+	if len(body) > 0 {
+		respErr.Body = string(body)
+	}
+	if respErr.ReadError != nil {
+		err = respErr
+		return
+	}
+	if acceptBody != nil && !acceptBody(body) {
+		err = respErr
+		respErr.WantBody = wantBody
+	}
+	return
+}
+
+// closeIgnoreError closes the specified closer if it is non-nil
+// and ignores any error encountered.
+func closeIgnoreError(closer io.Closer) {
+	if closer != nil {
+		_ = closer.Close()
+	}
+}
