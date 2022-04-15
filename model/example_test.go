@@ -23,7 +23,7 @@ import (
 	"fmt"
 
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	"github.com/donyori/gocorenlp/model/pb"
 )
 
 func ExampleDecodeResponseBody() {
@@ -67,9 +67,9 @@ AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 	}
 
 	// Specify the document model.
-	// Depending on your CoreNLP version, import the appropriate model.
+	// Depending on your CoreNLP version, use the appropriate model.
 	// See the documentation for this package for details.
-	doc := new(pb.Document)
+	doc := new(pb.Doc440)
 
 	// Decode the response body and place the result in doc.
 	err = model.DecodeResponseBody(b, doc)

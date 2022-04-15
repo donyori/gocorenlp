@@ -31,7 +31,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/donyori/gocorenlp/errors"
-	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	"github.com/donyori/gocorenlp/model/pb"
 )
 
 var PackageSimpleName string
@@ -127,8 +127,9 @@ func TestIsProtoBufError(t *testing.T) {
 }
 
 func TestNewProtoBufError(t *testing.T) {
-	docPtr := new(pb.Document)
+	docPtr := new(pb.Doc440)
 	var msg proto.Message = docPtr
+	// Since Doc440 is an alias, the type name should be the original type name.
 	docType := "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb.Document"
 
 	var st struct {
@@ -137,7 +138,7 @@ func TestNewProtoBufError(t *testing.T) {
 		name string
 		i    int
 		err  error
-		doc  *pb.Document
+		doc  *pb.Doc440
 	}
 	anonymousStructType := "struct { " + PackageSimpleName + ".timeoutError; name string; i int; err error; doc *pb.Document }"
 

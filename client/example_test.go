@@ -24,13 +24,16 @@ import (
 	"time"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	"github.com/donyori/gocorenlp/model/pb"
 )
 
 func Example() {
 	// This example is a simple procedure of annotating the string
 	//  "The quick brown fox jumped over the lazy dog."
 	// with Stanford CoreNLP.
+	//
+	// Don't run this example because there is no CoreNLP server
+	// in the example environment.
 
 	// Before calling client.AnnotateString,
 	// launch a Stanford CoreNLP server listening on 127.0.0.1:9000.
@@ -39,9 +42,9 @@ func Example() {
 	annotators := "tokenize,ssplit,pos"
 
 	// Specify the document model.
-	// Depending on your CoreNLP version, import the appropriate model.
+	// Depending on your CoreNLP version, use the appropriate model.
 	// See package github.com/donyori/gocorenlp/model for details.
-	doc := new(pb.Document)
+	doc := new(pb.Doc440)
 
 	// Annotate the text with the specified annotators
 	// and store the result in doc.
@@ -62,6 +65,9 @@ func Example() {
 }
 
 func Example_newClient() {
+	// Don't run this example because there is no CoreNLP server
+	// in the example environment.
+
 	// Before creating the client with default settings,
 	// launch a Stanford CoreNLP server listening on 127.0.0.1:9000.
 
@@ -74,9 +80,9 @@ func Example_newClient() {
 	annotators := "tokenize,ssplit,pos"
 
 	// Specify the document model.
-	// Depending on your CoreNLP version, import the appropriate model.
+	// Depending on your CoreNLP version, use the appropriate model.
 	// See package github.com/donyori/gocorenlp/model for details.
-	doc := new(pb.Document)
+	doc := new(pb.Doc440)
 
 	// Annotate the text with the specified annotators
 	// and store the result in doc.
@@ -97,6 +103,9 @@ func Example_newClient() {
 }
 
 func Example_specifyOptions() {
+	// Don't run this example because there is no CoreNLP server
+	// in the example environment.
+
 	// Before creating the client,
 	// launch a Stanford CoreNLP server listening on the specified address.
 	// The default address is 127.0.0.1:9000.
@@ -127,9 +136,9 @@ func Example_specifyOptions() {
 	text := "The quick brown fox jumped over the lazy dog."
 
 	// Specify the document model.
-	// Depending on your CoreNLP version, import the appropriate model.
+	// Depending on your CoreNLP version, use the appropriate model.
 	// See package github.com/donyori/gocorenlp/model for details.
-	doc := new(pb.Document)
+	doc := new(pb.Doc440)
 
 	// Annotate the text with the default annotators (specified in Options above)
 	// and store the result in doc.
@@ -145,6 +154,9 @@ func Example_specifyOptions() {
 func Example_cacheAnnotation() {
 	// In this example, we cache the response from the Stanford CoreNLP server
 	// into a local file for future use.
+	//
+	// Don't run this example because there is no CoreNLP server
+	// in the example environment.
 
 	// Before calling client.AnnotateStringRaw,
 	// launch a Stanford CoreNLP server listening on 127.0.0.1:9000.

@@ -16,29 +16,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package model_test
+package pb_test
 
 import (
 	"testing"
 
-	pb360 "github.com/donyori/gocorenlp/model/v3.6.0-29765338a2e8/pb"
-	pb400 "github.com/donyori/gocorenlp/model/v4.0.0-2b3dd38abe00/pb"
-	pb410 "github.com/donyori/gocorenlp/model/v4.1.0-a1427196ba6e/pb"
-	pb420 "github.com/donyori/gocorenlp/model/v4.2.0-3ad83fc2e42e/pb"
-	pb421 "github.com/donyori/gocorenlp/model/v4.2.1-d8d09b2c81a5/pb"
-	pb430 "github.com/donyori/gocorenlp/model/v4.3.0-f885cd198767/pb"
-	pb440 "github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	"github.com/donyori/gocorenlp/model/pb"
 )
 
-// This test is to ensure that importing ProtoBuf models of
-// different versions at the same time will not cause conflicts.
+// This test is to ensure that importing different versions of
+// ProtoBuf models at the same time will not cause conflicts.
 
 func TestDifferentVersions(t *testing.T) {
-	var _ *pb360.Document
-	var _ *pb400.Document
-	var _ *pb410.Document
-	var _ *pb420.Document
-	var _ *pb421.Document
-	var _ *pb430.Document
-	var _ *pb440.Document
+	var _ *pb.Doc360
+	var _ *pb.Doc400
+	var _ *pb.Doc410
+	var _ *pb.Doc420
+	var _ *pb.Doc421
+	var _ *pb.Doc422
+	var _ *pb.Doc430
+	var _ *pb.Doc431
+	var _ *pb.Doc432
+	var _ *pb.Doc440
 }

@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	"github.com/donyori/gocorenlp/model/pb"
 )
 
 const RosesAreRed = `
@@ -60,7 +60,7 @@ func TestDecodeResponseBody(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	doc := new(pb.Document)
+	doc := new(pb.Doc440)
 	if err = model.DecodeResponseBody(data, doc); err != nil {
 		t.Error(err)
 	}

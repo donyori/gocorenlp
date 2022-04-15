@@ -58,7 +58,7 @@ import (
 	"fmt"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/v4.4.0-e90f30f13c40/pb"
+	"github.com/donyori/gocorenlp/model/pb"
 )
 
 func main() {
@@ -66,9 +66,9 @@ func main() {
 	annotators := "tokenize,ssplit,pos,lemma"
 
 	// Specify the document model.
-	// Depending on your CoreNLP version, import the appropriate model.
+	// Depending on your CoreNLP version, use the appropriate model.
 	// Here we use the model corresponding to CoreNLP 4.4.0.
-	doc := new(pb.Document)
+	doc := new(pb.Doc440)
 
 	// Annotate the text with the specified annotators
 	// and store the result in doc.
@@ -225,7 +225,7 @@ You can decode it into the document model by function `DecodeResponseBody`
 in our package `model`:
 
 ```go
-doc := new(pb.Document)
+doc := new(pb.Doc440) // specify your document model
 err := model.DecodeResponseBody(data, doc) // data is that output by AnnotateRaw or AnnotateStringRaw
 if err != nil {
 	panic(err) // handle error
