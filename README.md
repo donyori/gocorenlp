@@ -203,9 +203,9 @@ To do this, use functions/methods `AnnotateRaw` or `AnnotateStringRaw`.
 Here is an example snippet to cache the annotation results in a local file:
 
 ```go
-// Open a file to save the annotation result.
+// Create a file to save the annotation result.
 filename := "./annotation.ann"
-f, err := os.Open(filename)
+f, err := os.Create(filename)
 if err != nil {
 	panic(err) // handle error
 }
@@ -268,13 +268,16 @@ if err != nil {
 }
 ```
 
-You may retrieve the CoreNLP ProtoBuf file from its [GitHub repository](https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/pipeline/CoreNLP.proto "CoreNLP.proto").
+You can retrieve the CoreNLP ProtoBuf file from its
+[GitHub repository](https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/pipeline/CoreNLP.proto "CoreNLP.proto").
 
-About how to compile ProtoBuf to Go, see [this tutorial](https://developers.google.com/protocol-buffers/docs/gotutorial "Protocol Buffer Basics: Go").
+About how to compile ProtoBuf to Go, see
+[this tutorial](https://developers.google.com/protocol-buffers/docs/gotutorial "Protocol Buffer Basics: Go").
 
 ---
 
-For more documentation about this library, see on [*pkg.go.dev*](https://pkg.go.dev/github.com/donyori/gocorenlp "gocorenlp package").
+For more documentation about this library, see on
+[*pkg.go.dev*](https://pkg.go.dev/github.com/donyori/gocorenlp "gocorenlp package").
 
 ## License
 

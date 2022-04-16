@@ -19,19 +19,17 @@
 package model_test
 
 import (
-	"encoding/base64"
 	"testing"
 
-	"github.com/donyori/gocorenlp/model"
+	"github.com/donyori/gocorenlp/internal/pbtest"
 	"github.com/donyori/gocorenlp/model/pb"
 )
 
-const RosesAreRed = `
-Roses are red.
-  Violets are blue.
-Sugar is sweet.
-  And so are you.
-`
+func TestDecodeResponseBody(t *testing.T) {
+	if err := pbtest.CheckDocumentFromBase64(Base64ResponseBody, new(pb.Doc440)); err != nil {
+		t.Error(err)
+	}
+}
 
 const Base64ResponseBody = `
 jAcKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
@@ -54,64 +52,3 @@ A1ZCUBoDYXJlKgEgMgEgOgNhcmVYPWBAiAEOkAEPqAEAsAIACikKA3lvdRIDUFJQ
 GgN5b3UqASAyADoDeW91WEFgRIgBD5ABEKgBALACAAohCgEuEgEuGgEuKgAyAQo6
 AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 `
-
-func TestDecodeResponseBody(t *testing.T) {
-	data, err := base64.StdEncoding.DecodeString(Base64ResponseBody)
-	if err != nil {
-		t.Fatal(err)
-	}
-	doc := new(pb.Doc440)
-	if err = model.DecodeResponseBody(data, doc); err != nil {
-		t.Error(err)
-	}
-	if txt := doc.GetText(); txt != RosesAreRed {
-		t.Errorf("got doc text %q; want %q", txt, RosesAreRed)
-	}
-
-	const nSentences = 4
-	nTokens := [nSentences]int{4, 4, 4, 5}
-	wordLists := [nSentences][]string{
-		{"Roses", "are", "red", "."},
-		{"Violets", "are", "blue", "."},
-		{"Sugar", "is", "sweet", "."},
-		{"And", "so", "are", "you", "."},
-	}
-	gapLists := [nSentences][]string{
-		{"\n", " ", " ", "", "\n  "},
-		{"\n  ", " ", " ", "", "\n"},
-		{"\n", " ", " ", "", "\n  "},
-		{"\n  ", " ", " ", " ", "", "\n"},
-	}
-	posLists := [nSentences][]string{
-		{"NNPS", "VBP", "JJ", "."},
-		{"NNS", "VBP", "JJ", "."},
-		{"NNP", "VBZ", "JJ", "."},
-		{"CC", "RB", "VBP", "PRP", "."},
-	}
-
-	sentences := doc.GetSentence()
-	if n := len(sentences); n != nSentences {
-		t.Fatalf("got %d sentence(s); want %d", n, nSentences)
-	}
-	for si, sentence := range sentences {
-		tokens := sentence.GetToken()
-		if n := len(tokens); n != nTokens[si] {
-			t.Errorf("sentence %d: got %d token(s); want %d", si, n, nTokens[si])
-			continue
-		}
-		for ti, token := range tokens {
-			if w := token.GetWord(); w != wordLists[si][ti] {
-				t.Errorf("Sentence %d, Token %d: got Word %q; want %q", si, ti, w, wordLists[si][ti])
-			}
-			if b := token.GetBefore(); b != gapLists[si][ti] {
-				t.Errorf("Sentence %d, Token %d: got Before %q; want %q", si, ti, b, gapLists[si][ti])
-			}
-			if a := token.GetAfter(); a != gapLists[si][ti+1] {
-				t.Errorf("Sentence %d, Token %d; got After %q; want %q", si, ti, a, gapLists[si][ti+1])
-			}
-			if p := token.GetPos(); p != posLists[si][ti] {
-				t.Errorf("Sentence %d, Token %d; got POS %q; want %q", si, ti, p, posLists[si][ti])
-			}
-		}
-	}
-}

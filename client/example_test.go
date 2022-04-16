@@ -164,13 +164,18 @@ func Example_cacheAnnotation() {
 	text := "The quick brown fox jumped over the lazy dog."
 	annotators := "tokenize,ssplit,pos"
 
-	// Open a file to save the annotation result.
+	// Create a file to save the annotation result.
 	filename := "./annotation.ann"
-	f, err := os.Open(filename)
+	f, err := os.Create(filename)
 	if err != nil {
 		panic(err) // handle error
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		// This error handler can usually be omitted.
+		if err := f.Close(); err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, err)
+		}
+	}(f)
 
 	// Annotate the text with the specified annotators
 	// and store the result in f.
