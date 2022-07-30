@@ -23,7 +23,7 @@ import (
 	"fmt"
 
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
 )
 
 func ExampleDecodeResponseBody() {
@@ -35,6 +35,7 @@ func ExampleDecodeResponseBody() {
 	// Sugar is sweet.
 	//   And so are you.
 	//
+	// with annotators "tokenize,ssplit,pos".
 	respBodyBase64 := `
 jAcKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoSwQEKMQoFUm9zZXMSBE5OUFMaBVJv
@@ -69,7 +70,7 @@ AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 	// Specify the document model.
 	// Depending on your CoreNLP version, use the appropriate model.
 	// See the documentation for this package for details.
-	doc := new(pb.Doc440)
+	doc := new(pb.Document)
 
 	// Decode the response body and place the result in doc.
 	err = model.DecodeResponseBody(b, doc)

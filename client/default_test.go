@@ -29,7 +29,7 @@ import (
 	"github.com/donyori/gocorenlp/client"
 	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
 )
 
 const DefaultPort uint16 = 9000
@@ -73,8 +73,8 @@ func TestReady(t *testing.T) {
 
 func TestAnnotate(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
-	AnnotateFunctionsFunc(t, func(annotators string) *pb.Doc440 {
-		doc := new(pb.Doc440)
+	AnnotateFunctionsFunc(t, func(annotators string) *pb.Document {
+		doc := new(pb.Document)
 		if err := client.Annotate(strings.NewReader(Text), annotators, doc); err != nil {
 			t.Error(err)
 			return nil
@@ -85,8 +85,8 @@ func TestAnnotate(t *testing.T) {
 
 func TestAnnotateString(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
-	AnnotateFunctionsFunc(t, func(annotators string) *pb.Doc440 {
-		doc := new(pb.Doc440)
+	AnnotateFunctionsFunc(t, func(annotators string) *pb.Document {
+		doc := new(pb.Document)
 		if err := client.AnnotateString(Text, annotators, doc); err != nil {
 			t.Error(err)
 			return nil
@@ -97,7 +97,7 @@ func TestAnnotateString(t *testing.T) {
 
 func TestAnnotateRaw(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
-	AnnotateFunctionsFunc(t, func(annotators string) *pb.Doc440 {
+	AnnotateFunctionsFunc(t, func(annotators string) *pb.Document {
 		var b bytes.Buffer
 		written, err := client.AnnotateRaw(strings.NewReader(Text), annotators, &b)
 		if err != nil {
@@ -108,7 +108,7 @@ func TestAnnotateRaw(t *testing.T) {
 			t.Errorf("got written %d; want %d", written, n)
 			return nil
 		}
-		doc := new(pb.Doc440)
+		doc := new(pb.Document)
 		if err = model.DecodeResponseBody(b.Bytes(), doc); err != nil {
 			t.Error(err)
 			return nil
@@ -119,7 +119,7 @@ func TestAnnotateRaw(t *testing.T) {
 
 func TestAnnotateStringRaw(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
-	AnnotateFunctionsFunc(t, func(annotators string) *pb.Doc440 {
+	AnnotateFunctionsFunc(t, func(annotators string) *pb.Document {
 		var b bytes.Buffer
 		written, err := client.AnnotateStringRaw(Text, annotators, &b)
 		if err != nil {
@@ -130,7 +130,7 @@ func TestAnnotateStringRaw(t *testing.T) {
 			t.Errorf("got written %d; want %d", written, n)
 			return nil
 		}
-		doc := new(pb.Doc440)
+		doc := new(pb.Document)
 		if err = model.DecodeResponseBody(b.Bytes(), doc); err != nil {
 			t.Error(err)
 			return nil
@@ -168,7 +168,7 @@ func SkipIfDefaultServerOffline(tb testing.TB) {
 
 // AnnotateFunctionsFunc encapsulates common code for testing the functions
 // Annotate, AnnotateString, AnnotateRaw, and AnnotateStringRaw.
-func AnnotateFunctionsFunc(t *testing.T, f func(annotators string) *pb.Doc440) {
+func AnnotateFunctionsFunc(t *testing.T, f func(annotators string) *pb.Document) {
 	annotators := []string{"", "tokenize,ssplit,pos"}
 	for _, ann := range annotators {
 		t.Run(fmt.Sprintf("annotator=%q", ann), func(t *testing.T) {
@@ -185,7 +185,7 @@ func AnnotateFunctionsFunc(t *testing.T, f func(annotators string) *pb.Doc440) {
 //
 // It checks the document text, sentence split, token word,
 // content before token, content after token, and token part-of-speech tag.
-func CheckAnnotation(t *testing.T, doc *pb.Doc440) {
+func CheckAnnotation(t *testing.T, doc *pb.Document) {
 	const nTokens = 10
 	wordArray := [nTokens]string{"The", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog", "."}
 	gapArray := [nTokens + 1]string{"", " ", " ", " ", " ", " ", " ", " ", " "}

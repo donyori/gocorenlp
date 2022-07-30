@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
 )
 
 func Example() {
@@ -44,7 +44,7 @@ func Example() {
 	// Specify the document model.
 	// Depending on your CoreNLP version, use the appropriate model.
 	// See package github.com/donyori/gocorenlp/model for details.
-	doc := new(pb.Doc440)
+	doc := new(pb.Document)
 
 	// Annotate the text with the specified annotators
 	// and store the result in doc.
@@ -82,7 +82,7 @@ func Example_newClient() {
 	// Specify the document model.
 	// Depending on your CoreNLP version, use the appropriate model.
 	// See package github.com/donyori/gocorenlp/model for details.
-	doc := new(pb.Doc440)
+	doc := new(pb.Document)
 
 	// Annotate the text with the specified annotators
 	// and store the result in doc.
@@ -138,7 +138,7 @@ func Example_specifyOptions() {
 	// Specify the document model.
 	// Depending on your CoreNLP version, use the appropriate model.
 	// See package github.com/donyori/gocorenlp/model for details.
-	doc := new(pb.Doc440)
+	doc := new(pb.Document)
 
 	// Annotate the text with the default annotators (specified in Options above)
 	// and store the result in doc.

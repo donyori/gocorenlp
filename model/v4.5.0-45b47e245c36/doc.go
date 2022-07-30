@@ -16,15 +16,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package pb provides shortcuts (aliases) for ProtoBuf models
-// corresponding to different versions of Stanford CoreNLP.
+// Package v4_5_0_45b47e245c36 corresponds to Stanford CoreNLP 4.5.0,
+// with commit hash 45b47e245c367663bba2e81a26ea7c29262ad0d8.
 //
-// The type DocXYZ is an alias for the document
-// structure for CoreNLP X.Y.Z.
-//
-// The type SentenceXYZ is an alias for the sentence
-// structure for CoreNLP X.Y.Z.
-//
-// The type TokenXYZ is an alias for the token
-// structure for CoreNLP X.Y.Z.
-package pb
+// See its subpackage pb for the structures.
+package v4_5_0_45b47e245c36

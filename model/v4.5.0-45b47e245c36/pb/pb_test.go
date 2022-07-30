@@ -21,21 +21,12 @@ package pb_test
 import (
 	"testing"
 
-	"github.com/donyori/gocorenlp/model/pb"
+	"github.com/donyori/gocorenlp/internal/pbtest"
+	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
 )
 
-// This test is to ensure that importing different versions of
-// ProtoBuf models at the same time will not cause conflicts.
-
-func TestDifferentVersions(t *testing.T) {
-	var _ *pb.Doc360
-	var _ *pb.Doc400
-	var _ *pb.Doc410
-	var _ *pb.Doc420
-	var _ *pb.Doc421
-	var _ *pb.Doc422
-	var _ *pb.Doc430
-	var _ *pb.Doc431
-	var _ *pb.Doc432
-	var _ *pb.Doc440
+func TestDecodeBase64Resp(t *testing.T) {
+	if err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV450, new(pb.Document)); err != nil {
+		t.Error(err)
+	}
 }
