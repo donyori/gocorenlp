@@ -149,6 +149,13 @@ func Example_specifyOptions() {
 
 	// Work with the document.
 	fmt.Println(doc.GetText())
+
+	// [Optional]
+	// Shut down the server.
+	err = c.ShutdownLocal()
+	if err != nil {
+		panic(err) // handle error
+	}
 }
 
 func Example_cacheAnnotation() {
