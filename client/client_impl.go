@@ -139,9 +139,9 @@ func (c *clientImpl) Ready() error {
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
 //
-//  import "github.com/donyori/gocorenlp/model/pb"
+//  import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
 //  ...
-//  outDoc := new(pb.Doc440)
+//  outDoc := new(pb.Document)
 //  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
 //  ...
 //
@@ -173,9 +173,9 @@ func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.M
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
 //
-//  import "github.com/donyori/gocorenlp/model/pb"
+//  import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
 //  ...
-//  outDoc := new(pb.Doc440)
+//  outDoc := new(pb.Document)
 //  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
 //  ...
 //
