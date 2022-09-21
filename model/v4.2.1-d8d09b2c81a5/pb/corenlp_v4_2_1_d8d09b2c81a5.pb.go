@@ -43,9 +43,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-//
 // An enumeration for the valid languages allowed in CoreNLP
-//
 type Language int32
 
 const (
@@ -129,9 +127,7 @@ func (Language) EnumDescriptor() ([]byte, []int) {
 	return file_corenlp_v4_2_1_d8d09b2c81a5_proto_rawDescGZIP(), []int{0}
 }
 
-//
 // An enumeration of valid sentiment values for the sentiment classifier.
-//
 type Sentiment int32
 
 const (
@@ -197,9 +193,7 @@ func (Sentiment) EnumDescriptor() ([]byte, []int) {
 	return file_corenlp_v4_2_1_d8d09b2c81a5_proto_rawDescGZIP(), []int{1}
 }
 
-//
 // The seven informative Natural Logic relations
-//
 type NaturalLogicRelation int32
 
 const (
@@ -271,9 +265,7 @@ func (NaturalLogicRelation) EnumDescriptor() ([]byte, []int) {
 	return file_corenlp_v4_2_1_d8d09b2c81a5_proto_rawDescGZIP(), []int{2}
 }
 
-//
 // A document; that is, the equivalent of an Annotation.
-//
 type Document struct {
 	state           protoimpl.MessageState
 	sizeCache       protoimpl.SizeCache
@@ -286,21 +278,21 @@ type Document struct {
 	DocID      *string       `protobuf:"bytes,4,opt,name=docID" json:"docID,omitempty"`
 	DocDate    *string       `protobuf:"bytes,7,opt,name=docDate" json:"docDate,omitempty"`
 	Calendar   *uint64       `protobuf:"varint,8,opt,name=calendar" json:"calendar,omitempty"`
-	//*
+	// *
 	// A peculiar field, for the corner case when a Document is
 	// serialized without any sentences. Otherwise
 	SentencelessToken []*Token `protobuf:"bytes,5,rep,name=sentencelessToken" json:"sentencelessToken,omitempty"`
 	Character         []*Token `protobuf:"bytes,10,rep,name=character" json:"character,omitempty"`
 	Quote             []*Quote `protobuf:"bytes,6,rep,name=quote" json:"quote,omitempty"`
-	//*
+	// *
 	// This field is for entity mentions across the document.
 	Mentions                    []*NERMention `protobuf:"bytes,9,rep,name=mentions" json:"mentions,omitempty"`
 	HasEntityMentionsAnnotation *bool         `protobuf:"varint,13,opt,name=hasEntityMentionsAnnotation" json:"hasEntityMentionsAnnotation,omitempty"` // used to differentiate between null and empty list
-	//*
+	// *
 	// xml information
 	XmlDoc   *bool      `protobuf:"varint,11,opt,name=xmlDoc" json:"xmlDoc,omitempty"`
 	Sections []*Section `protobuf:"bytes,12,rep,name=sections" json:"sections,omitempty"`
-	//* coref mentions for entire document *
+	// * coref mentions for entire document *
 	MentionsForCoref                    []*Mention `protobuf:"bytes,14,rep,name=mentionsForCoref" json:"mentionsForCoref,omitempty"`
 	HasCorefMentionAnnotation           *bool      `protobuf:"varint,15,opt,name=hasCorefMentionAnnotation" json:"hasCorefMentionAnnotation,omitempty"`
 	HasCorefAnnotation                  *bool      `protobuf:"varint,16,opt,name=hasCorefAnnotation" json:"hasCorefAnnotation,omitempty"`
@@ -466,9 +458,7 @@ func (x *Document) GetEntityMentionToCorefMentionMappings() []int32 {
 	return nil
 }
 
-//
 // The serialized version of a CoreMap representing a sentence.
-//
 type Sentence struct {
 	state           protoimpl.MessageState
 	sizeCache       protoimpl.SizeCache
@@ -889,9 +879,7 @@ func (x *Sentence) GetSpeakerType() string {
 	return ""
 }
 
-//
 // The serialized version of a Token (a CoreLabel).
-//
 type Token struct {
 	state           protoimpl.MessageState
 	sizeCache       protoimpl.SizeCache
@@ -926,7 +914,7 @@ type Token struct {
 	XmlContext      []string `protobuf:"bytes,22,rep,name=xmlContext" json:"xmlContext,omitempty"`            // Used by clean xml annotator
 	CorefClusterID  *uint32  `protobuf:"varint,23,opt,name=corefClusterID" json:"corefClusterID,omitempty"`   // The [primary] cluster id for this token
 	Answer          *string  `protobuf:"bytes,24,opt,name=answer" json:"answer,omitempty"`                    // A temporary annotation which is occasionally left in
-	//  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
+	// optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
 	HeadWordIndex       *uint32          `protobuf:"varint,26,opt,name=headWordIndex" json:"headWordIndex,omitempty"`               // The index of the head word of this word.
 	Operator            *Operator        `protobuf:"bytes,27,opt,name=operator" json:"operator,omitempty"`                          // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
 	Polarity            *Polarity        `protobuf:"bytes,28,opt,name=polarity" json:"polarity,omitempty"`                          // The polarity of this word, according to Natural Logic
@@ -945,11 +933,11 @@ type Token struct {
 	Gender       *string `protobuf:"bytes,51,opt,name=gender" json:"gender,omitempty"`             // gender annotation (machine reading)
 	TrueCase     *string `protobuf:"bytes,52,opt,name=trueCase" json:"trueCase,omitempty"`         // true case type of token
 	TrueCaseText *string `protobuf:"bytes,53,opt,name=trueCaseText" json:"trueCaseText,omitempty"` // true case gloss of token
-	//  Chinese character info
+	// Chinese character info
 	ChineseChar    *string `protobuf:"bytes,54,opt,name=chineseChar" json:"chineseChar,omitempty"`
 	ChineseSeg     *string `protobuf:"bytes,55,opt,name=chineseSeg" json:"chineseSeg,omitempty"`
 	ChineseXMLChar *string `protobuf:"bytes,60,opt,name=chineseXMLChar" json:"chineseXMLChar,omitempty"`
-	//  Arabic character info
+	// Arabic character info
 	ArabicSeg *string `protobuf:"bytes,76,opt,name=arabicSeg" json:"arabicSeg,omitempty"`
 	// Section info
 	SectionName     *string `protobuf:"bytes,56,opt,name=sectionName" json:"sectionName,omitempty"`
@@ -1454,9 +1442,7 @@ func (x *Token) GetCodepointOffsetEnd() uint32 {
 	return 0
 }
 
-//
 // A quotation marker in text
-//
 type Quote struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1664,9 +1650,7 @@ func (x *Quote) GetAttributionDependencyGraph() *DependencyGraph {
 	return nil
 }
 
-//
 // A syntactic parse tree, with scores.
-//
 type ParseTree struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1754,9 +1738,7 @@ func (x *ParseTree) GetSentiment() Sentiment {
 	return Sentiment_STRONG_NEGATIVE
 }
 
-//
 // A dependency graph representation.
-//
 type DependencyGraph struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1820,10 +1802,8 @@ func (x *DependencyGraph) GetRoot() []uint32 {
 	return nil
 }
 
-//
 // A coreference chain.
 // These fields are not *really* optional. CoreNLP will crash without them.
-//
 type CorefChain struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2380,9 +2360,7 @@ func (x *SpeakerInfo) GetMentions() []int32 {
 	return nil
 }
 
-//
 // A Span of text
-//
 type Span struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2438,10 +2416,8 @@ func (x *Span) GetEnd() uint32 {
 	return 0
 }
 
-//
 // A Timex object, representing a temporal expression (TIMe EXpression)
 // These fields are not *really* optional. CoreNLP will crash without them.
-//
 type Timex struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2537,11 +2513,9 @@ func (x *Timex) GetEndPoint() uint32 {
 	return 0
 }
 
-//
 // A representation of an entity in a relation.
 // This corresponds to the EntityMention, and more broadly the
 // ExtractionObject classes.
-//
 type Entity struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2670,9 +2644,7 @@ func (x *Entity) GetSubtype() string {
 	return ""
 }
 
-//
 // A representation of a relation, mirroring RelationMention
-//
 type Relation struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2777,9 +2749,7 @@ func (x *Relation) GetSubtype() string {
 	return ""
 }
 
-//
 // A Natural Logic operator
-//
 type Operator struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2875,9 +2845,7 @@ func (x *Operator) GetObjectSpanEnd() int32 {
 	return 0
 }
 
-//
 // The polarity of a word, according to Natural Logic
-//
 type Polarity struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2973,9 +2941,7 @@ func (x *Polarity) GetProjectIndependence() NaturalLogicRelation {
 	return NaturalLogicRelation_EQUIVALENCE
 }
 
-//
 // An NER mention in the text
-//
 type NERMention struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3111,10 +3077,8 @@ func (x *NERMention) GetEntityMentionText() string {
 	return ""
 }
 
-//
 // An entailed sentence fragment.
 // Created by the openie annotator.
-//
 type SentenceFragment struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3186,10 +3150,8 @@ func (x *SentenceFragment) GetScore() float64 {
 	return 0
 }
 
-//
 // The index of a token in a document, including the sentence
 // index and the offset.
-//
 type TokenLocation struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3245,10 +3207,8 @@ func (x *TokenLocation) GetTokenIndex() uint32 {
 	return 0
 }
 
-//
 // An OpenIE relation triple.
 // Created by the openie annotator.
-//
 type RelationTriple struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3384,10 +3344,8 @@ func (x *RelationTriple) GetSuffixOf() bool {
 	return false
 }
 
-//
 // A map from strings to strings.
 // Used, minimally, in the CoNLLU featurizer
-//
 type MapStringString struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3443,10 +3401,8 @@ func (x *MapStringString) GetValue() []string {
 	return nil
 }
 
-//
 // A map from integers to strings.
 // Used, minimally, in the CoNLLU featurizer
-//
 type MapIntString struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -3842,6 +3798,7 @@ type DependencyEnhancerRequest struct {
 
 	Document *Document `protobuf:"bytes,1,req,name=document" json:"document,omitempty"`
 	// Types that are assignable to Ref:
+	//
 	//	*DependencyEnhancerRequest_Language
 	//	*DependencyEnhancerRequest_RelativePronouns
 	Ref isDependencyEnhancerRequest_Ref `protobuf_oneof:"ref"`

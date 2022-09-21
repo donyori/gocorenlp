@@ -134,16 +134,17 @@ func (c *clientImpl) Ready() error {
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
-//  "tokenize,ssplit,pos,depparse"
+//
+//	"tokenize,ssplit,pos,depparse"
 //
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
 //
-//  import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
-//  ...
-//  outDoc := new(pb.Document)
-//  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
-//  ...
+//	import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+//	...
+//	outDoc := new(pb.Document)
+//	err := Annotate(input, "tokenize,ssplit,pos", outDoc)
+//	...
 //
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
@@ -168,16 +169,17 @@ func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.M
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
-//  "tokenize,ssplit,pos,depparse"
+//
+//	"tokenize,ssplit,pos,depparse"
 //
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
 //
-//  import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
-//  ...
-//  outDoc := new(pb.Document)
-//  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
-//  ...
+//	import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+//	...
+//	outDoc := new(pb.Document)
+//	err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
+//	...
 //
 // If outDoc is nil or not a pointer to Document,
 // a runtime error will occur.
@@ -198,7 +200,8 @@ func (c *clientImpl) AnnotateString(text, annotators string, outDoc proto.Messag
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
-//  "tokenize,ssplit,pos,depparse"
+//
+//	"tokenize,ssplit,pos,depparse"
 //
 // It returns the number of bytes written and any error encountered.
 func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error) {
@@ -268,7 +271,8 @@ func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.W
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
-//  "tokenize,ssplit,pos,depparse"
+//
+//	"tokenize,ssplit,pos,depparse"
 //
 // It returns the number of bytes written and any error encountered.
 func (c *clientImpl) AnnotateStringRaw(text, annotators string, output io.Writer) (written int64, err error) {

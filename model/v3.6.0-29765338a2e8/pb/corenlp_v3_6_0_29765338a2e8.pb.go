@@ -42,9 +42,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-//
 // An enumeration for the valid languages allowed in CoreNLP
-//
 type Language int32
 
 const (
@@ -125,9 +123,7 @@ func (Language) EnumDescriptor() ([]byte, []int) {
 	return file_corenlp_v3_6_0_29765338a2e8_proto_rawDescGZIP(), []int{0}
 }
 
-//
 // An enumeration of valid sentiment values for the sentiment classifier.
-//
 type Sentiment int32
 
 const (
@@ -193,9 +189,7 @@ func (Sentiment) EnumDescriptor() ([]byte, []int) {
 	return file_corenlp_v3_6_0_29765338a2e8_proto_rawDescGZIP(), []int{1}
 }
 
-//
 // The seven informative Natural Logic relations
-//
 type NaturalLogicRelation int32
 
 const (
@@ -267,9 +261,7 @@ func (NaturalLogicRelation) EnumDescriptor() ([]byte, []int) {
 	return file_corenlp_v3_6_0_29765338a2e8_proto_rawDescGZIP(), []int{2}
 }
 
-//
 // A document; that is, the equivalent of an Annotation.
-//
 type Document struct {
 	state           protoimpl.MessageState
 	sizeCache       protoimpl.SizeCache
@@ -280,7 +272,7 @@ type Document struct {
 	Sentence   []*Sentence   `protobuf:"bytes,2,rep,name=sentence" json:"sentence,omitempty"`
 	CorefChain []*CorefChain `protobuf:"bytes,3,rep,name=corefChain" json:"corefChain,omitempty"`
 	DocID      *string       `protobuf:"bytes,4,opt,name=docID" json:"docID,omitempty"`
-	//*
+	// *
 	// A peculiar field, for the corner case when a Document is
 	// serialized without any sentences. Otherwise
 	SentencelessToken []*Token `protobuf:"bytes,5,rep,name=sentencelessToken" json:"sentencelessToken,omitempty"`
@@ -361,9 +353,7 @@ func (x *Document) GetQuote() []*Quote {
 	return nil
 }
 
-//
 // The serialized version of a CoreMap representing a sentence.
-//
 type Sentence struct {
 	state           protoimpl.MessageState
 	sizeCache       protoimpl.SizeCache
@@ -629,9 +619,7 @@ func (x *Sentence) GetSentenceID() string {
 	return ""
 }
 
-//
 // The serialized version of a Token (a CoreLabel).
-//
 type Token struct {
 	state           protoimpl.MessageState
 	sizeCache       protoimpl.SizeCache
@@ -662,7 +650,7 @@ type Token struct {
 	XmlContext      []string `protobuf:"bytes,22,rep,name=xmlContext" json:"xmlContext,omitempty"`            // Used by clean xml annotator
 	CorefClusterID  *uint32  `protobuf:"varint,23,opt,name=corefClusterID" json:"corefClusterID,omitempty"`   // The [primary] cluster id for this token
 	Answer          *string  `protobuf:"bytes,24,opt,name=answer" json:"answer,omitempty"`                    // A temporary annotation which is occasionally left in
-	//  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
+	// optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
 	HeadWordIndex       *uint32          `protobuf:"varint,26,opt,name=headWordIndex" json:"headWordIndex,omitempty"`   // The index of the head word of this word.
 	Operator            *Operator        `protobuf:"bytes,27,opt,name=operator" json:"operator,omitempty"`              // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
 	Polarity            *Polarity        `protobuf:"bytes,28,opt,name=polarity" json:"polarity,omitempty"`              // The polarity of this word, according to Natural Logic
@@ -979,9 +967,7 @@ func (x *Token) GetTrueCaseText() string {
 	return ""
 }
 
-//
 // A quotation marker in text
-//
 type Quote struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1093,9 +1079,7 @@ func (x *Quote) GetIndex() uint32 {
 	return 0
 }
 
-//
 // A syntactic parse tree, with scores.
-//
 type ParseTree struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1183,9 +1167,7 @@ func (x *ParseTree) GetSentiment() Sentiment {
 	return Sentiment_STRONG_NEGATIVE
 }
 
-//
 // A dependency graph representation.
-//
 type DependencyGraph struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1249,10 +1231,8 @@ func (x *DependencyGraph) GetRoot() []uint32 {
 	return nil
 }
 
-//
 // A coreference chain.
 // These fields are not *really* optional. CoreNLP will crash without them.
-//
 type CorefChain struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1809,9 +1789,7 @@ func (x *SpeakerInfo) GetMentions() []int32 {
 	return nil
 }
 
-//
 // A Span of text
-//
 type Span struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1867,10 +1845,8 @@ func (x *Span) GetEnd() uint32 {
 	return 0
 }
 
-//
 // A Timex object, representing a temporal expression (TIMe EXpression)
 // These fields are not *really* optional. CoreNLP will crash without them.
-//
 type Timex struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1966,11 +1942,9 @@ func (x *Timex) GetEndPoint() uint32 {
 	return 0
 }
 
-//
 // A representation of an entity in a relation.
 // This corresponds to the EntityMention, and more broadly the
 // ExtractionObject classes.
-//
 type Entity struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2099,9 +2073,7 @@ func (x *Entity) GetSubtype() string {
 	return ""
 }
 
-//
 // A representation of a relation, mirroring RelationMention
-//
 type Relation struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2206,9 +2178,7 @@ func (x *Relation) GetSubtype() string {
 	return ""
 }
 
-//
 // A Natural Logic operator
-//
 type Operator struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2304,9 +2274,7 @@ func (x *Operator) GetObjectSpanEnd() int32 {
 	return 0
 }
 
-//
 // The polarity of a word, according to Natural Logic
-//
 type Polarity struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2402,9 +2370,7 @@ func (x *Polarity) GetProjectIndependence() NaturalLogicRelation {
 	return NaturalLogicRelation_EQUIVALENCE
 }
 
-//
 // An NER mention in the text
-//
 type NERMention struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2500,10 +2466,8 @@ func (x *NERMention) GetTimex() *Timex {
 	return nil
 }
 
-//
 // An entailed sentence fragment.
 // Created by the openie annotator.
-//
 type SentenceFragment struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2575,10 +2539,8 @@ func (x *SentenceFragment) GetScore() float64 {
 	return 0
 }
 
-//
 // An OpenIE relation triple.
 // Created by the openie annotator.
-//
 type RelationTriple struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2714,10 +2676,8 @@ func (x *RelationTriple) GetSuffixOf() bool {
 	return false
 }
 
-//
 // A map from strings to strings.
 // Used, minimally, in the CoNLLU featurizer
-//
 type MapStringString struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2773,10 +2733,8 @@ func (x *MapStringString) GetValue() []string {
 	return nil
 }
 
-//
 // A map from integers to strings.
 // Used, minimally, in the CoNLLU featurizer
-//
 type MapIntString struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

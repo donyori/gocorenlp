@@ -181,7 +181,8 @@ func AnnotateFunctionsFunc(t *testing.T, f func(annotators string) *pb.Document)
 }
 
 // CheckAnnotation checks the result of annotation to the text:
-//  The quick brown fox jumped over the lazy dog.
+//
+//	The quick brown fox jumped over the lazy dog.
 //
 // It checks the document text, sentence split, token word,
 // content before token, content after token, and token part-of-speech tag.

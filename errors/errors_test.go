@@ -184,7 +184,8 @@ func TestNewProtoBufError(t *testing.T) {
 //
 // It is useful for achieving wrapping an error within
 // different functions, for example:
-//  WrapError(errors.AutoWrap(err))
+//
+//	WrapError(errors.AutoWrap(err))
 func WrapError(err error) error {
 	return gogoerrors.AutoWrap(err)
 }

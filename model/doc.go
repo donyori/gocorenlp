@@ -21,7 +21,9 @@
 //
 // To fit different versions of CoreNLP,
 // the structures are organized into subpackages named in the form:
-//  github.com/donyori/gocorenlp/model/vX.Y.Z-abcdefabcdef/pb
+//
+//	github.com/donyori/gocorenlp/model/vX.Y.Z-abcdefabcdef/pb
+//
 // where X.Y.Z is the version of CoreNLP,
 // abcdefabcdef is a 12-character prefix of the commit hash of
 // the retrieved .proto file in the Stanford CoreNLP project,
@@ -51,7 +53,8 @@ package model
 // and follow the instructions in the README.
 //
 // To install "protoc-gen-go", run the following command:
-//  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+//
+//	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 //
 // After running these go:generate directives, files named like
 // "corenlp_*.pb.go" should be generated in its subpackages.

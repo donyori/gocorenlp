@@ -17,7 +17,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package pb provides auto-generated structures for
-// the data set of Stanford CoreNLP 4.5.0.
+// the data set of Stanford CoreNLP 4.5.0 and 4.5.1.
 //
 // The corresponding commit hash is 45b47e245c367663bba2e81a26ea7c29262ad0d8.
 package pb

@@ -109,7 +109,7 @@ func TestClientImpl_Live(t *testing.T) {
 	for i, name := range NonShutdownSubtestNames {
 		t.Run(name, func(t *testing.T) {
 			online := IsServerOnline(t, i, false)
-			c := NewClientImpl(t, i)
+			c := newClientImplForTest(t, i)
 			err := c.Live()
 			if online {
 				if err != nil {
@@ -128,7 +128,7 @@ func TestClientImpl_Ready(t *testing.T) {
 	for i, name := range NonShutdownSubtestNames {
 		t.Run(name, func(t *testing.T) {
 			online := IsServerOnline(t, i, false)
-			c := NewClientImpl(t, i)
+			c := newClientImplForTest(t, i)
 			err := c.Ready()
 			if online {
 				if err != nil {
@@ -148,7 +148,7 @@ func TestClientImpl_Annotate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
 			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
-				c := NewClientImpl(t, i)
+				c := newClientImplForTest(t, i)
 				doc := new(pb.Document)
 				if err := c.Annotate(strings.NewReader(Text), annotators, doc); err != nil {
 					t.Error(err)
@@ -165,7 +165,7 @@ func TestClientImpl_AnnotateString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
 			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
-				c := NewClientImpl(t, i)
+				c := newClientImplForTest(t, i)
 				doc := new(pb.Document)
 				if err := c.AnnotateString(Text, annotators, doc); err != nil {
 					t.Error(err)
@@ -182,7 +182,7 @@ func TestClientImpl_AnnotateRaw(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
 			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
-				c := NewClientImpl(t, i)
+				c := newClientImplForTest(t, i)
 				var b bytes.Buffer
 				written, err := c.AnnotateRaw(strings.NewReader(Text), annotators, &b)
 				if err != nil {
@@ -209,7 +209,7 @@ func TestClientImpl_AnnotateStringRaw(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			SkipIfServerOffline(t, i)
 			AnnotateMethodsFunc(t, func(annotators string) *pb.Document {
-				c := NewClientImpl(t, i)
+				c := newClientImplForTest(t, i)
 				var b bytes.Buffer
 				written, err := c.AnnotateStringRaw(Text, annotators, &b)
 				if err != nil {
@@ -236,7 +236,7 @@ func TestClientImpl_ShutdownLocal(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			index := i + NonShutdownNum
 			SkipIfServerOffline(t, index)
-			c := NewClientImpl(t, index)
+			c := newClientImplForTest(t, index)
 			if err := c.ShutdownLocal(); err != nil {
 				t.Error(err)
 			}
@@ -277,11 +277,11 @@ func SkipIfServerOffline(tb testing.TB, index int) {
 	}
 }
 
-// NewClientImpl creates a new *clientImpl according to
+// newClientImplForTest creates a new *clientImpl according to
 // the specified test index.
 //
 // It calls tb.Fatalf if the index is out of range.
-func NewClientImpl(tb testing.TB, index int) *clientImpl {
+func newClientImplForTest(tb testing.TB, index int) *clientImpl {
 	var opt *Options
 	switch index {
 	case DefaultIndex:
@@ -344,7 +344,8 @@ func CheckIsServerListeningOnPort(port uint16) bool {
 }
 
 // CheckAnnotation checks the result of annotation to the text:
-//  The quick brown fox jumped over the lazy dog.
+//
+//	The quick brown fox jumped over the lazy dog.
 //
 // It checks the document text, sentence split, token word,
 // content before token, content after token, and token part-of-speech tag.

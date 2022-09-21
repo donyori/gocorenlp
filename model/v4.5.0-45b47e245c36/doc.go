@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package v4_5_0_45b47e245c36 corresponds to Stanford CoreNLP 4.5.0,
+// Package v4_5_0_45b47e245c36 corresponds to Stanford CoreNLP 4.5.0 and 4.5.1,
 // with commit hash 45b47e245c367663bba2e81a26ea7c29262ad0d8.
 //
 // See its subpackage pb for the structures.
