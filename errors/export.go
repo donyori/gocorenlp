@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -18,9 +18,14 @@
 
 package errors
 
-import stderrors "errors"
+import (
+	stderrors "errors"
 
-// Export functions from standard package errors for convenience.
+	gogoerrors "github.com/donyori/gogo/errors"
+)
+
+// Export functions from standard package errors and
+// github.com/donyori/gogo/errors for convenience.
 
 // New directly calls the standard errors.New.
 func New(msg string) error {
@@ -37,7 +42,12 @@ func Is(err, target error) bool {
 	return stderrors.Is(err, target)
 }
 
-// As directly calls the standard errors.As.
-func As(err error, target interface{}) bool {
-	return stderrors.As(err, target)
+// As directly calls the github.com/donyori/gogo/errors.As.
+func As(err error, target any) bool {
+	return gogoerrors.As(err, target)
+}
+
+// Join directly calls the standard errors.Join.
+func Join(errs ...error) error {
+	return stderrors.Join(errs...)
 }

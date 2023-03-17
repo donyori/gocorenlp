@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -82,11 +82,6 @@ func newClientImpl(opt *Options) *clientImpl {
 	return c
 }
 
-// Live sends a status request to the liveness endpoint (/live) and
-// reports any error encountered to check whether the target server
-// is online.
-//
-// It returns nil if the server is online.
 func (c *clientImpl) Live() error {
 	liveUrl := &url.URL{
 		Scheme: "http",
@@ -102,11 +97,6 @@ func (c *clientImpl) Live() error {
 	return gogoerrors.AutoWrap(err)
 }
 
-// Ready sends a status request to the readiness endpoint (/ready) and
-// reports any error encountered to check whether the target server
-// is ready to accept connections.
-//
-// It returns nil if the server is ready to accept connections.
 func (c *clientImpl) Ready() error {
 	readyUrl := &url.URL{
 		Scheme: "http",
@@ -122,32 +112,6 @@ func (c *clientImpl) Ready() error {
 	return gogoerrors.AutoWrap(err)
 }
 
-// Annotate sends an annotation request with the specified annotators
-// to annotate the data read from the specified reader.
-// The annotation result is represented as
-// a CoreNLP document and stored in outDoc.
-//
-// If no annotators are specified,
-// the client's default annotators will be used.
-// If the client's annotators are also not specified,
-// the server's default annotators will be used.
-//
-// The annotators are separated by commas (,) in the string without spaces.
-// For example:
-//
-//	"tokenize,ssplit,pos,depparse"
-//
-// outDoc must be a non-nil pointer to an auto-generated Document
-// structure, for example:
-//
-//	import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
-//	...
-//	outDoc := new(pb.Document)
-//	err := Annotate(input, "tokenize,ssplit,pos", outDoc)
-//	...
-//
-// If outDoc is nil or not a pointer to Document,
-// a runtime error will occur.
 func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 	var b bytes.Buffer
 	if _, err := c.AnnotateRaw(input, annotators, &b); err != nil {
@@ -157,53 +121,10 @@ func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.M
 	return gogoerrors.AutoWrap(model.DecodeResponseBody(b.Bytes(), outDoc))
 }
 
-// AnnotateString sends an annotation request with
-// the specified text and annotators.
-// The annotation result is represented as
-// a CoreNLP document and stored in outDoc.
-//
-// If no annotators are specified,
-// the client's default annotators will be used.
-// If the client's annotators are also not specified,
-// the server's default annotators will be used.
-//
-// The annotators are separated by commas (,) in the string without spaces.
-// For example:
-//
-//	"tokenize,ssplit,pos,depparse"
-//
-// outDoc must be a non-nil pointer to an auto-generated Document
-// structure, for example:
-//
-//	import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
-//	...
-//	outDoc := new(pb.Document)
-//	err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
-//	...
-//
-// If outDoc is nil or not a pointer to Document,
-// a runtime error will occur.
 func (c *clientImpl) AnnotateString(text, annotators string, outDoc proto.Message) error {
 	return gogoerrors.AutoWrap(c.Annotate(strings.NewReader(text), annotators, outDoc))
 }
 
-// AnnotateRaw sends an annotation request with the specified annotators
-// to annotate the data read from the specified reader.
-// Then AnnotateRaw writes the response body to the specified writer
-// without parsing. The user can parse it later using the function
-// github.com/donyori/gocorenlp/model.DecodeResponseBody.
-//
-// If no annotators are specified,
-// the client's default annotators will be used.
-// If the client's annotators are also not specified,
-// the server's default annotators will be used.
-//
-// The annotators are separated by commas (,) in the string without spaces.
-// For example:
-//
-//	"tokenize,ssplit,pos,depparse"
-//
-// It returns the number of bytes written and any error encountered.
 func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error) {
 	// Check arguments first.
 	if input == nil {
@@ -257,33 +178,11 @@ func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.W
 	return
 }
 
-// AnnotateStringRaw sends an annotation request with
-// the specified text and annotators.
-// Then AnnotateStringRaw writes the response body to
-// the specified writer without parsing.
-// The user can parse it later using the function
-// github.com/donyori/gocorenlp/model.DecodeResponseBody.
-//
-// If no annotators are specified,
-// the client's default annotators will be used.
-// If the client's annotators are also not specified,
-// the server's default annotators will be used.
-//
-// The annotators are separated by commas (,) in the string without spaces.
-// For example:
-//
-//	"tokenize,ssplit,pos,depparse"
-//
-// It returns the number of bytes written and any error encountered.
 func (c *clientImpl) AnnotateStringRaw(text, annotators string, output io.Writer) (written int64, err error) {
 	written, err = c.AnnotateRaw(strings.NewReader(text), annotators, output)
 	return written, gogoerrors.AutoWrap(err)
 }
 
-// Shutdown sends a shutdown request with the specified key
-// to stop the target server.
-//
-// It returns nil if the server has been shut down successfully.
 func (c *clientImpl) Shutdown(key string) error {
 	qv := url.Values{"key": []string{key}}
 	shutdownUrl := &url.URL{
@@ -302,12 +201,6 @@ func (c *clientImpl) Shutdown(key string) error {
 	return gogoerrors.AutoWrap(err)
 }
 
-// ShutdownLocal finds the shutdown key and then sends
-// a shutdown request to stop the target server.
-//
-// It works only if the target server is on the local.
-//
-// It returns nil if the server has been shut down successfully.
 func (c *clientImpl) ShutdownLocal() error {
 	tmpDir := os.TempDir()
 	name := filepath.Join(tmpDir, "corenlp.shutdown")
@@ -338,7 +231,7 @@ func (c *clientImpl) private() {}
 // after dropping leading and trailing white space.
 //
 // wantBody is the expected body of the response.
-// It will be stored in the returned error
+// It is stored in the returned error
 // if the response body is unacceptable.
 //
 // If acceptBody is non-nil or wantBody is non-empty,

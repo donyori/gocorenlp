@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -72,3 +72,5 @@ package model
 //go:generate protoc --proto_path=v4.3.0-f885cd198767/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_3_0_f885cd198767.proto
 //go:generate protoc --proto_path=v4.4.0-e90f30f13c40/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_4_0_e90f30f13c40.proto
 //go:generate protoc --proto_path=v4.5.0-45b47e245c36/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_0_45b47e245c36.proto
+//go:generate protoc --proto_path=v4.5.2-9c3dfee5af50/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_2_9c3dfee5af50.proto
+//go:generate protoc --proto_path=v4.5.3-5250f9faf9f1/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_3_5250f9faf9f1.proto

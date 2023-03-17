@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -142,7 +142,7 @@ type ProtoBufError struct {
 // that the pointer v points to) until v is neither an interface nor a pointer
 // or v is nil.
 // Otherwise, it records the type name of v.
-func NewProtoBufError(Op string, v interface{}, err error) *ProtoBufError {
+func NewProtoBufError(Op string, v any, err error) *ProtoBufError {
 	typeName := "<nil>"
 	if v != nil {
 		value := reflect.ValueOf(v)

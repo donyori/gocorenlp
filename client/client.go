@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -48,9 +48,9 @@ type Client interface {
 	// a CoreNLP document and stored in outDoc.
 	//
 	// If no annotators are specified,
-	// the client's default annotators will be used.
+	// the client's default annotators are used.
 	// If the client's annotators are also not specified,
-	// the server's default annotators will be used.
+	// the server's default annotators are used.
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
@@ -65,8 +65,7 @@ type Client interface {
 	//  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
 	//  ...
 	//
-	// If outDoc is nil or not a pointer to Document,
-	// a runtime error will occur.
+	// If outDoc is nil or not a pointer to Document, a runtime error occurs.
 	Annotate(input io.Reader, annotators string, outDoc proto.Message) error
 
 	// AnnotateString sends an annotation request with
@@ -75,9 +74,9 @@ type Client interface {
 	// a CoreNLP document and stored in outDoc.
 	//
 	// If no annotators are specified,
-	// the client's default annotators will be used.
+	// the client's default annotators are used.
 	// If the client's annotators are also not specified,
-	// the server's default annotators will be used.
+	// the server's default annotators are used.
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
@@ -92,8 +91,7 @@ type Client interface {
 	//  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
 	//  ...
 	//
-	// If outDoc is nil or not a pointer to Document,
-	// a runtime error will occur.
+	// If outDoc is nil or not a pointer to Document, a runtime error occurs.
 	AnnotateString(text, annotators string, outDoc proto.Message) error
 
 	// AnnotateRaw sends an annotation request with the specified annotators
@@ -103,9 +101,9 @@ type Client interface {
 	// github.com/donyori/gocorenlp/model.DecodeResponseBody.
 	//
 	// If no annotators are specified,
-	// the client's default annotators will be used.
+	// the client's default annotators are used.
 	// If the client's annotators are also not specified,
-	// the server's default annotators will be used.
+	// the server's default annotators are used.
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
@@ -122,9 +120,9 @@ type Client interface {
 	// github.com/donyori/gocorenlp/model.DecodeResponseBody.
 	//
 	// If no annotators are specified,
-	// the client's default annotators will be used.
+	// the client's default annotators are used.
 	// If the client's annotators are also not specified,
-	// the server's default annotators will be used.
+	// the server's default annotators are used.
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:
@@ -155,10 +153,10 @@ type Client interface {
 // New creates a new Client for the Stanford CoreNLP server
 // with the specified options.
 //
-// If opt is nil, it will use default options.
+// If opt is nil, it uses default options.
 //
-// Before returning the client, it will test whether the target server is live.
-// If the test fails, it will report an error and return a nil client.
+// Before returning the client, it tests whether the target server is live.
+// If the test fails, it reports an error and returns a nil client.
 // Thus, make sure the server is online and set the appropriate host address
 // in opt before calling this function.
 func New(opt *Options) (c Client, err error) {

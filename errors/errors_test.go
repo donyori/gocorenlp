@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -37,8 +37,18 @@ import (
 var PackageSimpleName string
 
 func init() {
+	// Make sure that none of the five functions exported from
+	// the standard package errors and
+	// github.com/donyori/gogo/errors is missing.
+	_ = errors.New("")
+	_ = errors.Unwrap(nil)
+	_ = errors.Is(nil, nil)
+	var te *TimeoutError
+	_ = errors.As(nil, &te)
+	_ = errors.Join()
+
 	// Dynamically get the package name to avoid inappropriate test cases,
-	// particularly when moving the test to another package.
+	// especially when moving the test to another package.
 	pkg, _, ok := runtime.CallerPkgFunc(0)
 	if !ok {
 		panic("failed to retrieve package name")
@@ -50,12 +60,12 @@ func TestIsTimeoutError(t *testing.T) {
 	testCases := []IsErrorTestCase{
 		{},
 		{err: gogoerrors.New("common error")},
-		{err: &timeoutError{false}},
-		{err: &timeoutError{true}, want: true},
-		{err: gogoerrors.AutoWrap(&timeoutError{false})},
-		{err: gogoerrors.AutoWrap(&timeoutError{true}), want: true},
-		{err: WrapError(gogoerrors.AutoWrap(&timeoutError{false}))},
-		{err: WrapError(gogoerrors.AutoWrap(&timeoutError{true})), want: true},
+		{err: &TimeoutError{false}},
+		{err: &TimeoutError{true}, want: true},
+		{err: gogoerrors.AutoWrap(&TimeoutError{false})},
+		{err: gogoerrors.AutoWrap(&TimeoutError{true}), want: true},
+		{err: WrapError(gogoerrors.AutoWrap(&TimeoutError{false}))},
+		{err: WrapError(gogoerrors.AutoWrap(&TimeoutError{true})), want: true},
 	}
 	IsErrorFunc(t, errors.IsTimeoutError, testCases)
 }
@@ -132,19 +142,20 @@ func TestNewProtoBufError(t *testing.T) {
 	docType := "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb.Document"
 
 	var st struct {
-		timeoutError
+		TimeoutError
 
 		name string
 		i    int
 		err  error
 		doc  *pb.Document
 	}
-	anonymousStructType := "struct { " + PackageSimpleName + ".timeoutError; name string; i int; err error; doc *pb.Document }"
+	anonymousStructType := "struct { " + PackageSimpleName +
+		".TimeoutError; name string; i int; err error; doc *pb.Document }"
 
 	underlyingErr := gogoerrors.New("ProtoBuf error")
 	typeWantCases := []struct {
 		showName string
-		v        interface{}
+		v        any
 		want     string
 	}{
 		{"<nil>", nil, "<nil>"},
@@ -209,17 +220,17 @@ func IsErrorFunc(t *testing.T, f func(err error) bool, testCases []IsErrorTestCa
 	}
 }
 
-// timeoutError is a timeout error for use by TestIsTimeoutError.
+// TimeoutError is a timeout error for use by TestIsTimeoutError.
 //
 // It is a private type for testing unexported struct.
-type timeoutError struct {
+type TimeoutError struct {
 	timeout bool
 }
 
-func (e *timeoutError) Error() string {
+func (e *TimeoutError) Error() string {
 	return "timeout (test)"
 }
 
-func (e *timeoutError) Timeout() bool {
+func (e *TimeoutError) Timeout() bool {
 	return e != nil && e.timeout
 }

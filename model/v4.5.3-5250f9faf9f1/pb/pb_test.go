@@ -22,11 +22,11 @@ import (
 	"testing"
 
 	"github.com/donyori/gocorenlp/internal/pbtest"
-	"github.com/donyori/gocorenlp/model/v4.0.0-2b3dd38abe00/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 )
 
 func TestDecodeBase64Resp(t *testing.T) {
-	err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV400, new(pb.Document))
+	err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV453, new(pb.Document))
 	if err != nil {
 		t.Error(err)
 	}

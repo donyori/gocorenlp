@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -75,7 +75,7 @@ type Options struct {
 
 	// Annotators are the default annotators with the annotation request.
 	// If no annotators are specified with the annotation request,
-	// these annotators will be used.
+	// these annotators are used.
 	//
 	// The annotators are separated by commas (,) in the string without spaces.
 	// For example:

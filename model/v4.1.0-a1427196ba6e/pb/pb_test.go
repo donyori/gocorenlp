@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -26,7 +26,8 @@ import (
 )
 
 func TestDecodeBase64Resp(t *testing.T) {
-	if err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV410, new(pb.Document)); err != nil {
+	err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV410, new(pb.Document))
+	if err != nil {
 		t.Error(err)
 	}
 }

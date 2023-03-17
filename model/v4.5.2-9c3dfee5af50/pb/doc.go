@@ -16,18 +16,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package pb_test
-
-import (
-	"testing"
-
-	"github.com/donyori/gocorenlp/internal/pbtest"
-	"github.com/donyori/gocorenlp/model/v4.0.0-2b3dd38abe00/pb"
-)
-
-func TestDecodeBase64Resp(t *testing.T) {
-	err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV400, new(pb.Document))
-	if err != nil {
-		t.Error(err)
-	}
-}
+// Package pb provides auto-generated structures for
+// the data set of Stanford CoreNLP 4.5.2.
+//
+// The corresponding commit hash is 9c3dfee5af50a2279429ae9e010ba51c8f91b351.
+package pb

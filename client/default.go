@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -64,7 +64,7 @@ func Ready() error {
 // a CoreNLP document and stored in outDoc.
 //
 // If no annotators are specified,
-// the server's default annotators will be used.
+// the server's default annotators are used.
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
@@ -80,8 +80,7 @@ func Ready() error {
 //	err := Annotate(input, "tokenize,ssplit,pos", outDoc)
 //	...
 //
-// If outDoc is nil or not a pointer to Document,
-// a runtime error will occur.
+// If outDoc is nil or not a pointer to Document, a runtime error occurs.
 func Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 	return gogoerrors.AutoWrap(defaultClient.Annotate(input, annotators, outDoc))
 }
@@ -97,7 +96,7 @@ func Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 // a CoreNLP document and stored in outDoc.
 //
 // If no annotators are specified,
-// the server's default annotators will be used.
+// the server's default annotators are used.
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
@@ -113,8 +112,7 @@ func Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 //	err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
 //	...
 //
-// If outDoc is nil or not a pointer to Document,
-// a runtime error will occur.
+// If outDoc is nil or not a pointer to Document, a runtime error occurs.
 func AnnotateString(text, annotators string, outDoc proto.Message) error {
 	return gogoerrors.AutoWrap(defaultClient.AnnotateString(text, annotators, outDoc))
 }
@@ -130,7 +128,7 @@ func AnnotateString(text, annotators string, outDoc proto.Message) error {
 // github.com/donyori/gocorenlp/model.DecodeResponseBody.
 //
 // If no annotators are specified,
-// the server's default annotators will be used.
+// the server's default annotators are used.
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:
@@ -156,7 +154,7 @@ func AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written 
 // github.com/donyori/gocorenlp/model.DecodeResponseBody.
 //
 // If no annotators are specified,
-// the server's default annotators will be used.
+// the server's default annotators are used.
 //
 // The annotators are separated by commas (,) in the string without spaces.
 // For example:

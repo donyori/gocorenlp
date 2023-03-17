@@ -130,12 +130,12 @@ Here is an example snippet:
 
 ```go
 c, err := client.New(&client.Options{
-	Hostname:   "localhost", // Set the hostname here. If omitted, "127.0.0.1" will be used.
-	Port:       8080,        // Set the port number here. If omitted, 9000 will be used.
-	StatusPort: 8081,        // Set the port number of the status server here. If omitted, it will be the same as Port.
+	Hostname:   "localhost", // Set the hostname here. If omitted, "127.0.0.1" is used.
+	Port:       8080,        // Set the port number here. If omitted, 9000 is used.
+	StatusPort: 8081,        // Set the port number of the status server here. If omitted, it is the same as Port.
 
 	Timeout:    time.Second * 15,      // Set a timeout for each request here.
-	Charset:    "utf-8",               // Set the charset of your text here. If omitted, "utf-8" will be used.
+	Charset:    "utf-8",               // Set the charset of your text here. If omitted, "utf-8" is used.
 	Annotators: "tokenize,ssplit,pos", // Set the default annotators here.
 
 	// Set the username and password here
@@ -277,6 +277,8 @@ models and CoreNLP versions:
 | model/v4.3.0-f885cd198767/pb | 4.3.0, 4.3.1, 4.3.2 |
 | model/v4.4.0-e90f30f13c40/pb | 4.4.0               |
 | model/v4.5.0-45b47e245c36/pb | 4.5.0, 4.5.1        |
+| model/v4.5.2-9c3dfee5af50/pb | 4.5.2               |
+| model/v4.5.3-5250f9faf9f1/pb | 4.5.3               |
 
 *(CoreNLP 4.2.1 and 4.2.2 use exactly the identical ProtoBuf model,
 as do 4.3.0, 4.3.1, 4.3.2, and 4.5.0, 4.5.1.)*

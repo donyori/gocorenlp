@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022  Yuan Gao
+// Copyright (C) 2022-2023  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -532,3 +532,15 @@ Af///////////wGIAf///////////wE=
 //
 // It is the same as RosesAreRedRespV440.
 const RosesAreRedRespV450 = RosesAreRedRespV440
+
+// RosesAreRedRespV452 is the base64 encoded response of annotating RosesAreRed
+// with the server default annotators by Stanford CoreNLP 4.5.2.
+//
+// It is the same as RosesAreRedRespV440.
+const RosesAreRedRespV452 = RosesAreRedRespV440
+
+// RosesAreRedRespV453 is the base64 encoded response of annotating RosesAreRed
+// with the server default annotators by Stanford CoreNLP 4.5.3.
+//
+// It is the same as RosesAreRedRespV440.
+const RosesAreRedRespV453 = RosesAreRedRespV440
