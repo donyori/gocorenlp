@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package v4_5_3_5250f9faf9f1 corresponds to Stanford CoreNLP 4.5.3,
+// Package v4_5_3_5250f9faf9f1 corresponds to Stanford CoreNLP 4.5.3 and 4.5.4,
 // with commit hash 5250f9faf9f192a2350000b7fecf65d1d5b63e13.
 //
 // See its subpackage pb for the structures.

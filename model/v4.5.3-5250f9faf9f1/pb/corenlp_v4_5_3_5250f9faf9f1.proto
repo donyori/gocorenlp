@@ -17,7 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //
-// This file defines the ProtoBuf messages used by Stanford CoreNLP 4.5.3.
+// This file defines the ProtoBuf messages used by
+// Stanford CoreNLP 4.5.3 and 4.5.4.
 //
 
 syntax = "proto2";
