@@ -84,13 +84,13 @@ type Options struct {
 	// Default: "" (empty, no annotator is specified by default)
 	Annotators string `json:"annotators,omitempty"`
 
-	// ServerId is the value of the option -server_id used
+	// ServerID is the value of the option -server_id used
 	// when starting the target server.
 	//
 	// If the server is started without that option, leave it empty.
 	//
 	// Default: "" (empty)
-	ServerId string `json:"serverId,omitempty"`
+	ServerID string `json:"serverID,omitempty"`
 
 	// onlyKeyedLiterals forces others to construct Options
 	// only with the keyed literals, so future additions to it

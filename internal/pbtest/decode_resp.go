@@ -37,25 +37,25 @@ Sugar is sweet.
   And so are you.
 `
 
-// RosesAreRedSentenceNum is the expected number of sentences for RosesAreRed.
-const RosesAreRedSentenceNum = 4
+// NumRosesAreRedSentence is the expected number of sentences for RosesAreRed.
+const NumRosesAreRedSentence = 4
 
 // Expected annotation results for RosesAreRed.
 var (
-	RosesAreRedSentenceTokenNumList   = [RosesAreRedSentenceNum]int{4, 4, 4, 5}
-	RosesAreRedSentenceTokenWordLists = [RosesAreRedSentenceNum][]string{
+	NumRosesAreRedSentenceTokenList   = [NumRosesAreRedSentence]int{4, 4, 4, 5}
+	RosesAreRedSentenceTokenWordLists = [NumRosesAreRedSentence][]string{
 		{"Roses", "are", "red", "."},
 		{"Violets", "are", "blue", "."},
 		{"Sugar", "is", "sweet", "."},
 		{"And", "so", "are", "you", "."},
 	}
-	RosesAreRedSentenceTokenGapLists = [RosesAreRedSentenceNum][]string{
+	RosesAreRedSentenceTokenGapLists = [NumRosesAreRedSentence][]string{
 		{"\n", " ", " ", "", "\n  "},
 		{"\n  ", " ", " ", "", "\n"},
 		{"\n", " ", " ", "", "\n  "},
 		{"\n  ", " ", " ", " ", "", "\n"},
 	}
-	RosesAreRedSentenceTokenPosLists = [RosesAreRedSentenceNum][]string{
+	RosesAreRedSentenceTokenPosLists = [NumRosesAreRedSentence][]string{
 		{"NNPS", "VBP", "JJ", "."},
 		{"NNS", "VBP", "JJ", "."},
 		{"NNP", "VBZ", "JJ", "."},
@@ -158,11 +158,11 @@ func checkSentenceSlice(docV reflect.Value) error {
 		))
 	}
 	n := sentSliceV.Len()
-	if n != RosesAreRedSentenceNum {
+	if n != NumRosesAreRedSentence {
 		return gogoerrors.AutoNew(fmt.Sprintf(
 			"got %d sentence(s); want %d",
 			n,
-			RosesAreRedSentenceNum,
+			NumRosesAreRedSentence,
 		))
 	}
 	for i := 0; i < n; i++ {
@@ -208,12 +208,12 @@ func checkTokensOfSentence(sentSliceV reflect.Value, sentIdx int) error {
 		))
 	}
 	n := tokenSliceV.Len()
-	if n != RosesAreRedSentenceTokenNumList[sentIdx] {
+	if n != NumRosesAreRedSentenceTokenList[sentIdx] {
 		return gogoerrors.AutoNew(fmt.Sprintf(
 			"got %d token(s) in sentence#%d; want %d",
 			n,
 			sentIdx,
-			RosesAreRedSentenceTokenNumList[sentIdx],
+			NumRosesAreRedSentenceTokenList[sentIdx],
 		))
 	}
 	for i := 0; i < n; i++ {

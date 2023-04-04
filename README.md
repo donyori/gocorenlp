@@ -146,7 +146,7 @@ c, err := client.New(&client.Options{
 	// If your server has a server ID
 	// (i.e., server name, set by -server_id),
 	// set it here.
-	ServerId: "CoreNLPServer",
+	ServerID: "CoreNLPServer",
 })
 if err != nil {
 	panic(err) // handle error
