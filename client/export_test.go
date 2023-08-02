@@ -20,7 +20,8 @@ package client
 
 // Export for testing only.
 
-// NewClientNoLiveCheck directly calls the unexported function newClientImpl.
-func NewClientNoLiveCheck(opts *Options) Client {
+// NewClientWithoutCheckingLive directly calls
+// the unexported function newClientImpl.
+func NewClientWithoutCheckingLive(opts *Options) Client {
 	return newClientImpl(opts)
 }

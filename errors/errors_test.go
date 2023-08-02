@@ -31,7 +31,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/donyori/gocorenlp/errors"
-	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 )
 
 var PackageSimpleName string
@@ -139,7 +139,7 @@ func TestIsProtoBufError(t *testing.T) {
 func TestNewProtoBufError(t *testing.T) {
 	docPtr := new(pb.Document)
 	var msg proto.Message = docPtr
-	docType := "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb.Document"
+	docType := "github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb.Document"
 
 	var st struct {
 		TimeoutError

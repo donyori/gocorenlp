@@ -58,7 +58,7 @@ import (
 	"fmt"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 )
 
 func main() {
@@ -67,7 +67,7 @@ func main() {
 
 	// Specify the document model.
 	// Depending on your CoreNLP version, use the appropriate model.
-	// Here we use the model corresponding to CoreNLP 4.5.0.
+	// See package github.com/donyori/gocorenlp/model for details.
 	doc := new(pb.Document)
 
 	// Annotate the text with the specified annotators
@@ -231,6 +231,35 @@ doc := new(pb.Document) // specify your document model
 err := model.DecodeResponseBody(data, doc) // data is that output by AnnotateRaw or AnnotateStringRaw
 if err != nil {
 	panic(err) // handle error
+}
+```
+
+If you put many annotation results together in a large file,
+you can decode them using `ResponseBodyDecoder`:
+
+```go
+// Open your annotation result file.
+filename := "./annotation.ann"
+f, err := os.Open(filename)
+if err != nil {
+	panic(err) // handle error
+}
+defer f.Close()
+
+// Create a ResponseBodyDecoder on it.
+dec := model.NewResponseBodyDecoder(f)
+
+// Decode the annotation results until EOF.
+for {
+	doc := new(pb.Document) // specify your document model
+	err := dec.Decode(doc)
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		panic(err) // handle error
+	}
+	// Work with doc.
 }
 ```
 

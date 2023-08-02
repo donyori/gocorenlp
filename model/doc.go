@@ -40,7 +40,7 @@
 //
 // The .pb.go files are auto-generated according to
 // the corresponding .proto files. For more information,
-// see <https://developers.google.com/protocol-buffers/docs/gotutorial>.
+// see <https://protobuf.dev/getting-started/gotutorial/>.
 package model
 
 // The following go:generate directives are for compiling all the
@@ -49,8 +49,7 @@ package model
 // Before running it, make sure that the ProtoBuf compiler "protoc" and
 // its Go plugin "protoc-gen-go" are installed and available in $PATH.
 //
-// To install "protoc", see <https://developers.google.com/protocol-buffers/docs/downloads>
-// and follow the instructions in the README.
+// To install "protoc", see <https://protobuf.dev/downloads/>.
 //
 // To install "protoc-gen-go", run the following command:
 //

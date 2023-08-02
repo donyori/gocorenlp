@@ -26,7 +26,8 @@ import (
 )
 
 func TestDecodeBase64Resp(t *testing.T) {
-	err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV360, new(pb.Document))
+	err := pbtest.CheckRosesAreRedDocumentFromBase64(
+		pbtest.RosesAreRedRespV360, new(pb.Document))
 	if err != nil {
 		t.Error(err)
 	}

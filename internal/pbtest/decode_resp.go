@@ -81,7 +81,44 @@ type Document interface {
 	GetDocID() string
 }
 
-// DecodeBase64ToPb decodes the base64 encoded CoreNLP server
+// CheckRosesAreRedText examines whether the text returned by getter.GetText
+// is the same as RosesAreRed.
+//
+// It reports an error if getter is nil or the text returned by
+// getter.GetText is different from RosesAreRed.
+func CheckRosesAreRedText(getter TextGetter) error {
+	if getter == nil {
+		return gogoerrors.AutoNew("text getter is nil")
+	}
+	if text := getter.GetText(); text != RosesAreRed {
+		return gogoerrors.AutoNew(fmt.Sprintf(
+			"got %q; want %q", text, RosesAreRed))
+	}
+	return nil
+}
+
+// CheckRosesAreRedDocument examines whether
+// the annotation in doc is that of RosesAreRed.
+func CheckRosesAreRedDocument(doc Document) (err error) {
+	if err = CheckRosesAreRedText(doc); err != nil {
+		return gogoerrors.AutoWrap(err)
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			if rErr, ok := r.(error); ok {
+				err = gogoerrors.AutoWrapSkip(
+					fmt.Errorf("panic: %w", rErr), 1)
+			} else {
+				err = gogoerrors.AutoNewCustom(
+					fmt.Sprintf("panic: %v", r), -1, 1)
+			}
+		}
+	}()
+	return gogoerrors.AutoWrap(
+		checkRosesAreRedSentenceSlice(reflect.ValueOf(doc)))
+}
+
+// DecodeBase64ToPb decodes the standard base64 (as defined in RFC 4648) encoded CoreNLP server
 // response body into a ProtoBuf message.
 func DecodeBase64ToPb(base64String string, msg proto.Message) error {
 	b, err := base64.StdEncoding.DecodeString(base64String)
@@ -91,45 +128,19 @@ func DecodeBase64ToPb(base64String string, msg proto.Message) error {
 	return gogoerrors.AutoWrap(model.DecodeResponseBody(b, msg))
 }
 
-// CheckText examines whether the text returned by getter.GetText
-// is the same as RosesAreRed.
-//
-// It reports an error if getter is nil or the text returned by
-// getter.GetText is different from RosesAreRed.
-func CheckText(getter TextGetter) error {
-	if getter == nil {
-		return gogoerrors.AutoNew("text getter is nil")
-	}
-	if text := getter.GetText(); text != RosesAreRed {
-		return gogoerrors.AutoNew(fmt.Sprintf("got %q; want %q", text, RosesAreRed))
-	}
-	return nil
-}
-
-// CheckDocumentFromBase64 decodes base64String to doc
-// and then checks the annotation results in doc.
-func CheckDocumentFromBase64(base64String string, doc Document) (err error) {
+// CheckRosesAreRedDocumentFromBase64 decodes base64String to doc
+// and then examines whether the annotation in doc is that of RosesAreRed.
+func CheckRosesAreRedDocumentFromBase64(base64String string, doc Document) (
+	err error) {
 	if err = DecodeBase64ToPb(base64String, doc); err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	if err = CheckText(doc); err != nil {
-		return gogoerrors.AutoWrap(err)
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			if rErr, ok := r.(error); ok {
-				err = gogoerrors.AutoWrapSkip(fmt.Errorf("panic: %v", rErr), 1)
-			} else {
-				err = gogoerrors.AutoNewCustom(fmt.Sprintf("panic: %v", r), gogoerrors.PrependFullFuncName, 1)
-			}
-		}
-	}()
-	return gogoerrors.AutoWrap(checkSentenceSlice(reflect.ValueOf(doc)))
+	return gogoerrors.AutoWrap(CheckRosesAreRedDocument(doc))
 }
 
-// checkSentenceSlice is a sub procedure of
-// the function CheckDocumentFromBase64.
-func checkSentenceSlice(docV reflect.Value) error {
+// checkRosesAreRedSentenceSlice is a sub procedure of
+// the function CheckRosesAreRedDocumentFromBase64.
+func checkRosesAreRedSentenceSlice(docV reflect.Value) error {
 	if kind := docV.Kind(); kind != reflect.Interface && kind != reflect.Pointer {
 		return gogoerrors.AutoNew("doc is neither an interface nor a pointer")
 	}
@@ -166,15 +177,16 @@ func checkSentenceSlice(docV reflect.Value) error {
 		))
 	}
 	for i := 0; i < n; i++ {
-		if err := checkTokensOfSentence(sentSliceV, i); err != nil {
+		if err := checkRosesAreRedTokensOfSentence(sentSliceV, i); err != nil {
 			return gogoerrors.AutoWrap(err)
 		}
 	}
 	return nil
 }
 
-// checkTokensOfSentence is a sub procedure of the function checkSentenceSlice.
-func checkTokensOfSentence(sentSliceV reflect.Value, sentIdx int) error {
+// checkRosesAreRedTokensOfSentence is a sub procedure of
+// the function checkRosesAreRedSentenceSlice.
+func checkRosesAreRedTokensOfSentence(sentSliceV reflect.Value, sentIdx int) error {
 	sentV := sentSliceV.Index(sentIdx)
 	// The type of sentV has already been examined.
 	m := sentV.MethodByName("GetToken")
@@ -217,15 +229,20 @@ func checkTokensOfSentence(sentSliceV reflect.Value, sentIdx int) error {
 		))
 	}
 	for i := 0; i < n; i++ {
-		if err := checkToken(tokenSliceV, sentIdx, i); err != nil {
+		if err := checkRosesAreRedToken(tokenSliceV, sentIdx, i); err != nil {
 			return gogoerrors.AutoWrap(err)
 		}
 	}
 	return nil
 }
 
-// checkToken is a sub procedure of the function checkTokensOfSentence.
-func checkToken(tokenSliceV reflect.Value, sentIdx, tokenIdx int) error {
+// checkRosesAreRedToken is a sub procedure of
+// the function checkRosesAreRedTokensOfSentence.
+func checkRosesAreRedToken(
+	tokenSliceV reflect.Value,
+	sentIdx int,
+	tokenIdx int,
+) error {
 	tokenV := tokenSliceV.Index(tokenIdx)
 	// The type of tokenV has already been examined.
 	cases := []struct {
@@ -239,15 +256,30 @@ func checkToken(tokenSliceV reflect.Value, sentIdx, tokenIdx int) error {
 		{method: "GetPos", want: RosesAreRedSentenceTokenPosLists[sentIdx][tokenIdx], comparePrefixN: 2},
 	}
 	for _, c := range cases {
-		if err := checkStringMethod(tokenV, c.method, c.want, c.comparePrefixN, sentIdx, tokenIdx); err != nil {
+		err := checkStringMethod(
+			tokenV,
+			c.method,
+			c.want,
+			c.comparePrefixN,
+			sentIdx,
+			tokenIdx,
+		)
+		if err != nil {
 			return gogoerrors.AutoWrap(err)
 		}
 	}
 	return nil
 }
 
-// checkStringMethod is a sub procedure of the function checkToken.
-func checkStringMethod(tokenV reflect.Value, methodName, want string, comparePrefixN, sentIdx, tokenIdx int) error {
+// checkStringMethod is a sub procedure of the function checkRosesAreRedToken.
+func checkStringMethod(
+	tokenV reflect.Value,
+	methodName string,
+	want string,
+	comparePrefixN int,
+	sentIdx int,
+	tokenIdx int,
+) error {
 	m := tokenV.MethodByName(methodName)
 	if !m.IsValid() {
 		return gogoerrors.AutoNew(fmt.Sprintf(

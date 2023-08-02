@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 )
 
 func Example() {

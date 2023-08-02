@@ -28,7 +28,7 @@ import (
 	"github.com/donyori/gocorenlp/client"
 	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 )
 
 const DefaultPort uint16 = 9000
@@ -39,7 +39,8 @@ var RunShutdownTest bool
 var ParseFlagOnce sync.Once
 
 func init() {
-	flag.BoolVar(&RunShutdownTest, FlagNameTestFuncShutdown, false, "Set if want to test Shutdown.")
+	flag.BoolVar(&RunShutdownTest, FlagNameTestFuncShutdown, false,
+		"Set if want to test Shutdown.")
 }
 
 func TestLive(t *testing.T) {

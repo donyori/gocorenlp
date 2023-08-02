@@ -70,7 +70,7 @@ type Client interface {
 	// outDoc must be a non-nil pointer to an auto-generated Document
 	// structure, for example:
 	//
-	//  import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+	//  import "github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 	//  ...
 	//  outDoc := new(pb.Document)
 	//  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
@@ -96,7 +96,7 @@ type Client interface {
 	// outDoc must be a non-nil pointer to an auto-generated Document
 	// structure, for example:
 	//
-	//  import "github.com/donyori/gocorenlp/model/v4.5.0-45b47e245c36/pb"
+	//  import "github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
 	//  ...
 	//  outDoc := new(pb.Document)
 	//  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
@@ -121,7 +121,8 @@ type Client interface {
 	//  "tokenize,ssplit,pos,depparse"
 	//
 	// It returns the number of bytes written and any error encountered.
-	AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error)
+	AnnotateRaw(input io.Reader, annotators string, output io.Writer) (
+		written int64, err error)
 
 	// AnnotateStringRaw sends an annotation request with
 	// the specified text and annotators.
@@ -140,7 +141,8 @@ type Client interface {
 	//  "tokenize,ssplit,pos,depparse"
 	//
 	// It returns the number of bytes written and any error encountered.
-	AnnotateStringRaw(text, annotators string, output io.Writer) (written int64, err error)
+	AnnotateStringRaw(text, annotators string, output io.Writer) (
+		written int64, err error)
 
 	// Shutdown sends a shutdown request with the specified key
 	// to stop the target server.
@@ -254,7 +256,11 @@ func (c *clientImpl) Ready() error {
 	return gogoerrors.AutoWrap(err)
 }
 
-func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
+func (c *clientImpl) Annotate(
+	input io.Reader,
+	annotators string,
+	outDoc proto.Message,
+) error {
 	var b bytes.Buffer
 	if _, err := c.AnnotateRaw(input, annotators, &b); err != nil {
 		return gogoerrors.AutoWrap(err)
@@ -263,11 +269,19 @@ func (c *clientImpl) Annotate(input io.Reader, annotators string, outDoc proto.M
 	return gogoerrors.AutoWrap(model.DecodeResponseBody(b.Bytes(), outDoc))
 }
 
-func (c *clientImpl) AnnotateString(text, annotators string, outDoc proto.Message) error {
-	return gogoerrors.AutoWrap(c.Annotate(strings.NewReader(text), annotators, outDoc))
+func (c *clientImpl) AnnotateString(
+	text, annotators string,
+	outDoc proto.Message,
+) error {
+	return gogoerrors.AutoWrap(c.Annotate(
+		strings.NewReader(text), annotators, outDoc))
 }
 
-func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.Writer) (written int64, err error) {
+func (c *clientImpl) AnnotateRaw(
+	input io.Reader,
+	annotators string,
+	output io.Writer,
+) (written int64, err error) {
 	// Check arguments first.
 	if input == nil {
 		panic(gogoerrors.AutoMsg("input reader is nil"))
@@ -320,7 +334,10 @@ func (c *clientImpl) AnnotateRaw(input io.Reader, annotators string, output io.W
 	return
 }
 
-func (c *clientImpl) AnnotateStringRaw(text, annotators string, output io.Writer) (written int64, err error) {
+func (c *clientImpl) AnnotateStringRaw(
+	text, annotators string,
+	output io.Writer,
+) (written int64, err error) {
 	written, err = c.AnnotateRaw(strings.NewReader(text), annotators, output)
 	return written, gogoerrors.AutoWrap(err)
 }
@@ -351,7 +368,8 @@ func (c *clientImpl) ShutdownLocal() error {
 	}
 	key, err := os.ReadFile(name)
 	if err != nil {
-		return gogoerrors.AutoWrap(fmt.Errorf("failed to find the key: %v", err))
+		return gogoerrors.AutoWrap(fmt.Errorf(
+			"failed to find the key: %w", err))
 	}
 	return gogoerrors.AutoWrap(c.Shutdown(string(key)))
 }

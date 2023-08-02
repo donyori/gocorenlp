@@ -18,8 +18,9 @@
 
 package pbtest
 
-// RosesAreRedRespV360 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 3.6.0.
+// RosesAreRedRespV360 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 3.6.0.
 const RosesAreRedRespV360 = `
 nx4KRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoSgQcKUQoFUm9zZXMSBE5OUFMaBVJv
@@ -104,8 +105,9 @@ VVRSQUwqCUlOQU5JTUFURTAAOAFIAFACWAESMwgDEgpQUk9OT01JTkFMGgdVTktO
 T1dOIgdVTktOT1dOKgdBTklNQVRFMAM4BEgDUANYARgA
 `
 
-// RosesAreRedRespV400 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.0.0.
+// RosesAreRedRespV400 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.0.0.
 const RosesAreRedRespV400 = `
 +zoKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoS1gwKgAEKBVJvc2VzEgROTlBTGgVS
@@ -267,8 +269,9 @@ BJoDBAgCEAN4AYABAYgB////////////AYgB////////////AYgB////////////
 AYgB////////////AQ==
 `
 
-// RosesAreRedRespV410 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.1.0.
+// RosesAreRedRespV410 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.1.0.
 const RosesAreRedRespV410 = `
 pSsKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoS2wgKZQoFUm9zZXMSBE5OUFMaBVJv
@@ -388,26 +391,30 @@ CAIQA5IDBAgCEASaAwQIAhADeAGAAQGIAf///////////wGIAf///////////wGI
 Af///////////wGIAf///////////wE=
 `
 
-// RosesAreRedRespV420 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.2.0.
+// RosesAreRedRespV420 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.2.0.
 //
 // It is the same as RosesAreRedRespV410.
 const RosesAreRedRespV420 = RosesAreRedRespV410
 
-// RosesAreRedRespV421 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.2.1.
+// RosesAreRedRespV421 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.2.1.
 //
 // It is the same as RosesAreRedRespV410.
 const RosesAreRedRespV421 = RosesAreRedRespV410
 
-// RosesAreRedRespV430 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.3.0.
+// RosesAreRedRespV430 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.3.0.
 //
 // It is the same as RosesAreRedRespV410.
 const RosesAreRedRespV430 = RosesAreRedRespV410
 
-// RosesAreRedRespV440 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.4.0.
+// RosesAreRedRespV440 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators
+// by Stanford CoreNLP 4.4.0.
 const RosesAreRedRespV440 = `
 pSsKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoS2wgKZQoFUm9zZXMSBE5OUFMaBVJv
@@ -527,20 +534,23 @@ CAIQA5IDBAgCEASaAwQIAhADeAGAAQGIAf///////////wGIAf///////////wGI
 Af///////////wGIAf///////////wE=
 `
 
-// RosesAreRedRespV450 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.5.0.
+// RosesAreRedRespV450 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.5.0.
 //
 // It is the same as RosesAreRedRespV440.
 const RosesAreRedRespV450 = RosesAreRedRespV440
 
-// RosesAreRedRespV452 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.5.2.
+// RosesAreRedRespV452 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.5.2.
 //
 // It is the same as RosesAreRedRespV440.
 const RosesAreRedRespV452 = RosesAreRedRespV440
 
-// RosesAreRedRespV453 is the base64 encoded response of annotating RosesAreRed
-// with the server default annotators by Stanford CoreNLP 4.5.3.
+// RosesAreRedRespV453 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.5.3.
 //
 // It is the same as RosesAreRedRespV440.
 const RosesAreRedRespV453 = RosesAreRedRespV440

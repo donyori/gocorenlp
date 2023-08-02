@@ -40,9 +40,13 @@ import (
 // returns true for this error.
 //
 // For more information about the wire encoding, see
-// <https://developers.google.com/protocol-buffers/docs/encoding>.
+// <https://protobuf.dev/programming-guides/encoding/>.
 func DecodeMessage(b []byte, msg proto.Message) error {
-	if err := proto.Unmarshal(b, msg); err != nil {
+	if msg == nil {
+		return gogoerrors.AutoNew("the provided message is nil")
+	}
+	err := proto.Unmarshal(b, msg)
+	if err != nil {
 		return gogoerrors.AutoWrap(errors.NewProtoBufError(
 			"google.golang.org/protobuf/proto.Unmarshal",
 			msg,
@@ -56,6 +60,9 @@ func DecodeMessage(b []byte, msg proto.Message) error {
 // document) from the body of a Stanford CoreNLP server response in b,
 // and stores the result in msg.
 //
+// If there are other contents after the response body in b,
+// these contents are ignored.
+//
 // The specified message msg must be a non-nil pointer to a ProtoBuf message.
 //
 // If the returned error is non-nil, it has an underlying error of type
@@ -63,10 +70,38 @@ func DecodeMessage(b []byte, msg proto.Message) error {
 // The function github.com/donyori/gocorenlp/errors.IsProtoBufError
 // returns true for this error.
 func DecodeResponseBody(b []byte, msg proto.Message) error {
+	_, err := ConsumeResponseBody(b, msg)
+	return gogoerrors.AutoWrap(err)
+}
+
+// ConsumeResponseBody is like the function DecodeResponseBody,
+// but it additionally returns the number of bytes decoded from b.
+// It enables the caller to determine the range of the response body (b[:n]).
+//
+// ConsumeResponseBody may return a negative n upon an error.
+// A negative n can be converted into an error value using
+// google.golang.org/protobuf/encoding/protowire.ParseError.
+//
+// If n is negative, the returned error err must be non-nil,
+// have an underlying error of type
+// *github.com/donyori/gocorenlp/errors.ProtoBufError,
+// and wrap the protowire.ParseError(n).
+// The function github.com/donyori/gocorenlp/errors.IsProtoBufError
+// returns true for this error.
+func ConsumeResponseBody(b []byte, msg proto.Message) (n int, err error) {
+	if msg == nil {
+		return 0, gogoerrors.AutoNew("the provided message is nil")
+	}
 	v, n := protowire.ConsumeBytes(b)
-	var err error
 	if n >= 0 {
-		err = DecodeMessage(v, msg)
+		err = proto.Unmarshal(v, msg)
+		if err != nil {
+			err = errors.NewProtoBufError(
+				"google.golang.org/protobuf/proto.Unmarshal",
+				msg,
+				err,
+			)
+		}
 	} else {
 		err = errors.NewProtoBufError(
 			"google.golang.org/protobuf/encoding/protowire.ConsumeBytes",
@@ -74,5 +109,5 @@ func DecodeResponseBody(b []byte, msg proto.Message) error {
 			protowire.ParseError(n),
 		)
 	}
-	return gogoerrors.AutoWrap(err)
+	return n, gogoerrors.AutoWrap(err)
 }

@@ -27,7 +27,8 @@ import (
 
 func TestDecodeBase64Resp(t *testing.T) {
 	// CoreNLP 4.3.0, 4.3.1, and 4.3.2 respond with the same content.
-	err := pbtest.CheckDocumentFromBase64(pbtest.RosesAreRedRespV430, new(pb.Document))
+	err := pbtest.CheckRosesAreRedDocumentFromBase64(
+		pbtest.RosesAreRedRespV430, new(pb.Document))
 	if err != nil {
 		t.Error(err)
 	}
