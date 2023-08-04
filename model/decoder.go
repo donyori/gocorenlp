@@ -103,12 +103,12 @@ func (rbd *responseBodyDecoder) Decode(msg proto.Message) error {
 		}
 		buf[n], n = c, n+1
 	}
-	sizeBytes := buf[:n]
-	size, n := protowire.ConsumeVarint(sizeBytes)
+	t := buf[:n]
+	size, n := protowire.ConsumeVarint(t)
 	if n < 0 {
 		return gogoerrors.AutoWrap(errors.NewProtoBufError(
 			"google.golang.org/protobuf/encoding/protowire.ConsumeVarint",
-			sizeBytes,
+			t,
 			protowire.ParseError(n),
 		))
 	}
@@ -116,11 +116,12 @@ func (rbd *responseBodyDecoder) Decode(msg proto.Message) error {
 	if uint64(len(buf)) < size {
 		buf = make([]byte, size)
 	}
-	_, err = io.ReadFull(rbd.r, buf)
+	t = buf[:size]
+	_, err = io.ReadFull(rbd.r, t)
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	err = proto.Unmarshal(buf[:size], msg)
+	err = proto.Unmarshal(t, msg)
 	if err != nil {
 		return gogoerrors.AutoWrap(errors.NewProtoBufError(
 			"google.golang.org/protobuf/proto.Unmarshal",
