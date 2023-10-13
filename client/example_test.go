@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
 )
 
 func Example() {
@@ -115,9 +115,9 @@ func Example_specifyOptions() {
 		Port:       8080,        // Set the port number here. If omitted, 9000 is used.
 		StatusPort: 8081,        // Set the port number of the status server here. If omitted, it is the same as Port.
 
-		Timeout:    time.Second * 15,      // Set a timeout for each request here.
-		Charset:    "utf-8",               // Set the charset of your text here. If omitted, "utf-8" is used.
-		Annotators: "tokenize,ssplit,pos", // Set the default annotators here.
+		ClientTimeout: time.Second * 15,      // Set a timeout for each request here.
+		Charset:       "utf-8",               // Set the charset of your text here. If omitted, "utf-8" is used.
+		Annotators:    "tokenize,ssplit,pos", // Set the default annotators here.
 
 		// Set the username and password here
 		// if your server requires a basic auth.

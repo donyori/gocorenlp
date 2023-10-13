@@ -27,7 +27,7 @@ import (
 
 	"github.com/donyori/gocorenlp/internal/pbtest"
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
 )
 
 func TestResponseBodyDecoder_OneResponse(t *testing.T) {
@@ -84,34 +84,12 @@ func TestResponseBodyDecoder_TwoResponses(t *testing.T) {
 
 func TestResponseBodyDecoder_DifferentResponses(t *testing.T) {
 	const NumRepeat int = 3
-	rosesRespBody, err := base64.StdEncoding.DecodeString(RosesResp)
+	data, _, err := MakeDifferentResponsesData(NumRepeat)
 	if err != nil {
 		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	yesterdayRespBody, err := base64.StdEncoding.DecodeString(YesterdayResp)
-	if err != nil {
-		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	rosesShortRespBody, err := base64.StdEncoding.DecodeString(RosesShortResp)
-	if err != nil {
-		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	yesterdayShortRespBody, err := base64.StdEncoding.DecodeString(
-		YesterdayShortResp)
-	if err != nil {
-		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	b := make([]byte, (len(rosesRespBody)+len(yesterdayRespBody)+
-		len(rosesShortRespBody)+len(yesterdayShortRespBody))*NumRepeat)
-	var n int
-	for i := 0; i < NumRepeat; i++ {
-		n += copy(b[n:], rosesRespBody)
-		n += copy(b[n:], yesterdayRespBody)
-		n += copy(b[n:], rosesShortRespBody)
-		n += copy(b[n:], yesterdayShortRespBody)
 	}
 
-	dec := model.NewResponseBodyDecoder(bytes.NewReader(b))
+	dec := model.NewResponseBodyDecoder(bytes.NewReader(data))
 	if dec == nil {
 		t.Fatal("got nil decoder")
 	}

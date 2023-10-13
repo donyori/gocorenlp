@@ -70,7 +70,7 @@ type Client interface {
 	// outDoc must be a non-nil pointer to an auto-generated Document
 	// structure, for example:
 	//
-	//  import "github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
+	//  import "github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
 	//  ...
 	//  outDoc := new(pb.Document)
 	//  err := Annotate(input, "tokenize,ssplit,pos", outDoc)
@@ -96,7 +96,7 @@ type Client interface {
 	// outDoc must be a non-nil pointer to an auto-generated Document
 	// structure, for example:
 	//
-	//  import "github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
+	//  import "github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
 	//  ...
 	//  outDoc := new(pb.Document)
 	//  err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
@@ -208,8 +208,8 @@ func newClientImpl(opt *Options) *clientImpl {
 			c.userinfo = url.User(username)
 		}
 	}
-	if opt.Timeout > 0 {
-		c.c.Timeout = opt.Timeout
+	if opt.ClientTimeout > 0 {
+		c.c.Timeout = opt.ClientTimeout
 	}
 	if len(opt.Annotators) > 0 {
 		c.annotators = strings.Join(strings.Fields(opt.Annotators), "") // drop white space

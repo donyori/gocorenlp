@@ -73,3 +73,4 @@ package model
 //go:generate protoc --proto_path=v4.5.0-45b47e245c36/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_0_45b47e245c36.proto
 //go:generate protoc --proto_path=v4.5.2-9c3dfee5af50/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_2_9c3dfee5af50.proto
 //go:generate protoc --proto_path=v4.5.3-5250f9faf9f1/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_3_5250f9faf9f1.proto
+//go:generate protoc --proto_path=v4.5.5-f1b929e47a57/pb --go_out=. --go_opt=module=github.com/donyori/gocorenlp/model corenlp_v4_5_5_f1b929e47a57.proto

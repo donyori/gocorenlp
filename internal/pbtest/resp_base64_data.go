@@ -554,3 +554,10 @@ const RosesAreRedRespV452 = RosesAreRedRespV440
 //
 // It is the same as RosesAreRedRespV440.
 const RosesAreRedRespV453 = RosesAreRedRespV440
+
+// RosesAreRedRespV455 is the standard base64 (as defined in RFC 4648) encoded
+// response of annotating RosesAreRed with the server default annotators by
+// Stanford CoreNLP 4.5.5.
+//
+// It is the same as RosesAreRedRespV440.
+const RosesAreRedRespV455 = RosesAreRedRespV440

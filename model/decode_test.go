@@ -23,12 +23,13 @@ import (
 	"io"
 	"testing"
 
+	gogoerrors "github.com/donyori/gogo/errors"
 	"google.golang.org/protobuf/encoding/protowire"
 
 	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/internal/pbtest"
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
 )
 
 func TestDecodeMessage_Basic(t *testing.T) {
@@ -286,42 +287,19 @@ func TestConsumeResponseBody_TwoResponses(t *testing.T) {
 
 func TestConsumeResponseBody_DifferentResponses(t *testing.T) {
 	const NumRepeat int = 3
-	rosesRespBody, err := base64.StdEncoding.DecodeString(RosesResp)
+	data, lens, err := MakeDifferentResponsesData(NumRepeat)
 	if err != nil {
 		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	yesterdayRespBody, err := base64.StdEncoding.DecodeString(YesterdayResp)
-	if err != nil {
-		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	rosesShortRespBody, err := base64.StdEncoding.DecodeString(RosesShortResp)
-	if err != nil {
-		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	yesterdayShortRespBody, err := base64.StdEncoding.DecodeString(
-		YesterdayShortResp)
-	if err != nil {
-		t.Fatal("failed to decode standard base64 encoded response:", err)
-	}
-	b := make([]byte, (len(rosesRespBody)+len(yesterdayRespBody)+
-		len(rosesShortRespBody)+len(yesterdayShortRespBody))*NumRepeat)
-	var n int
-	for i := 0; i < NumRepeat; i++ {
-		n += copy(b[n:], rosesRespBody)
-		n += copy(b[n:], yesterdayRespBody)
-		n += copy(b[n:], rosesShortRespBody)
-		n += copy(b[n:], yesterdayShortRespBody)
 	}
 
-	p := b[:]
+	p := data[:]
 	for i := 0; i < NumRepeat; i++ {
 		doc := new(pb.Document)
 		n, err := model.ConsumeResponseBody(p, doc)
 		if err != nil {
 			t.Fatalf("Round %d: %v", i+1, err)
-		} else if n != len(rosesRespBody) {
-			t.Fatalf("Round %d: got n %d; want %d",
-				i+1, n, len(rosesRespBody))
+		} else if n != lens[0] {
+			t.Fatalf("Round %d: got n %d; want %d", i+1, n, lens[0])
 		}
 		err = pbtest.CheckRosesAreRedDocument(doc)
 		if err != nil {
@@ -333,9 +311,8 @@ func TestConsumeResponseBody_DifferentResponses(t *testing.T) {
 		n, err = model.ConsumeResponseBody(p, doc)
 		if err != nil {
 			t.Fatalf("Round %d: %v", i+1, err)
-		} else if n != len(yesterdayRespBody) {
-			t.Fatalf("Round %d: got n %d; want %d",
-				i+1, n, len(yesterdayRespBody))
+		} else if n != lens[1] {
+			t.Fatalf("Round %d: got n %d; want %d", i+1, n, lens[1])
 		} else if text := doc.GetText(); text != YesterdayIsHistory {
 			t.Fatalf("Round %d: got text %q; want %q",
 				i+1, text, YesterdayIsHistory)
@@ -346,9 +323,8 @@ func TestConsumeResponseBody_DifferentResponses(t *testing.T) {
 		n, err = model.ConsumeResponseBody(p, doc)
 		if err != nil {
 			t.Fatalf("Round %d: %v", i+1, err)
-		} else if n != len(rosesShortRespBody) {
-			t.Fatalf("Round %d: got n %d; want %d",
-				i+1, n, len(rosesShortRespBody))
+		} else if n != lens[2] {
+			t.Fatalf("Round %d: got n %d; want %d", i+1, n, lens[2])
 		}
 		err = pbtest.CheckRosesAreRedDocument(doc)
 		if err != nil {
@@ -360,9 +336,9 @@ func TestConsumeResponseBody_DifferentResponses(t *testing.T) {
 		n, err = model.ConsumeResponseBody(p, doc)
 		if err != nil {
 			t.Fatalf("Round %d: %v", i+1, err)
-		} else if n != len(yesterdayShortRespBody) {
+		} else if n != lens[3] {
 			t.Fatalf("Round %d: got n %d; want %d",
-				i+1, n, len(yesterdayShortRespBody))
+				i+1, n, lens[3])
 		} else if text := doc.GetText(); text != YesterdayIsHistory {
 			t.Fatalf("Round %d: got text %q; want %q",
 				i+1, text, YesterdayIsHistory)
@@ -382,7 +358,7 @@ const (
 	//	Sugar is sweet.
 	//	  And so are you.
 	//
-	// with the server default annotators by Stanford CoreNLP 4.5.3.
+	// with the server default annotators by Stanford CoreNLP 4.5.5.
 	RosesResp = pbtest.RosesAreRedRespV453
 
 	// YesterdayResp is the standard base64 (as defined in RFC 4648)
@@ -390,7 +366,7 @@ const (
 	//
 	//	Yesterday is history. Tomorrow is a mystery. Today is a gift. That’s why we call it 'The Present'
 	//
-	// with the server default annotators by Stanford CoreNLP 4.5.3.
+	// with the server default annotators by Stanford CoreNLP 4.5.5.
 	YesterdayResp = `
 1VIKY1llc3RlcmRheSBpcyBoaXN0b3J5LiBUb21vcnJvdyBpcyBhIG15c3Rlcnku
 IFRvZGF5IGlzIGEgZ2lmdC4gVGhhdOKAmXMgd2h5IHdlIGNhbGwgaXQgJ1RoZSBQ
@@ -623,7 +599,7 @@ AQKIAf///////////wGIAf///////////wGIAf///////////wGIAf//////////
 	//	Sugar is sweet.
 	//	  And so are you.
 	//
-	// with annotators "tokenize,ssplit,pos" by Stanford CoreNLP 4.5.3.
+	// with annotators "tokenize,ssplit,pos" by Stanford CoreNLP 4.5.5.
 	RosesShortResp = `
 jAcKRgpSb3NlcyBhcmUgcmVkLgogIFZpb2xldHMgYXJlIGJsdWUuClN1Z2FyIGlz
 IHN3ZWV0LgogIEFuZCBzbyBhcmUgeW91LgoSwQEKMQoFUm9zZXMSBE5OUFMaBVJv
@@ -651,7 +627,7 @@ AS5YRGBFiAEQkAERqAEAsAIAEAwYESADKDYwRZgDALADAIgEAFgAaAB4AIABAA==
 	//
 	//	Yesterday is history. Tomorrow is a mystery. Today is a gift. That’s why we call it 'The Present'
 	//
-	// with annotators "tokenize,ssplit,pos" by Stanford CoreNLP 4.5.3.
+	// with annotators "tokenize,ssplit,pos" by Stanford CoreNLP 4.5.5.
 	YesterdayShortResp = `
 5AkKY1llc3RlcmRheSBpcyBoaXN0b3J5LiBUb21vcnJvdyBpcyBhIG15c3Rlcnku
 IFRvZGF5IGlzIGEgZ2lmdC4gVGhhdOKAmXMgd2h5IHdlIGNhbGwgaXQgJ1RoZSBQ
@@ -682,3 +658,50 @@ GgEnKgAyADoBJ1hgYGGIAReQARioAQCwAgAQDhgYIAMoPjBhmAMAsAMAiAQAWABo
 AHgAgAEA
 `
 )
+
+// MakeDifferentResponsesData generates bytes consisting of the decoding
+// results of RosesResp, YesterdayResp, RosesShortResp, and YesterdayShortResp,
+// repeating the specified number of times.
+//
+// It also returns the lengths of the decoding results of RosesResp,
+// YesterdayResp, RosesShortResp, and YesterdayShortResp, of type [4]int.
+//
+// If the returned error is non-nil,
+// it is caused by base64.StdEncoding.DecodeString.
+func MakeDifferentResponsesData(numRepeat int) (
+	data []byte, lens [4]int, err error) {
+	rosesRespBody, err := base64.StdEncoding.DecodeString(RosesResp)
+	lens[0] = len(rosesRespBody)
+	if err != nil {
+		err = gogoerrors.AutoWrap(err)
+		return
+	}
+	yesterdayRespBody, err := base64.StdEncoding.DecodeString(YesterdayResp)
+	lens[1] = len(yesterdayRespBody)
+	if err != nil {
+		err = gogoerrors.AutoWrap(err)
+		return
+	}
+	rosesShortRespBody, err := base64.StdEncoding.DecodeString(RosesShortResp)
+	lens[2] = len(rosesShortRespBody)
+	if err != nil {
+		err = gogoerrors.AutoWrap(err)
+		return
+	}
+	yesterdayShortRespBody, err := base64.StdEncoding.DecodeString(
+		YesterdayShortResp)
+	lens[3] = len(yesterdayShortRespBody)
+	if err != nil {
+		err = gogoerrors.AutoWrap(err)
+		return
+	}
+	data = make([]byte, (lens[0]+lens[1]+lens[2]+lens[3])*numRepeat)
+	var n int
+	for i := 0; i < numRepeat; i++ {
+		n += copy(data[n:], rosesRespBody)
+		n += copy(data[n:], yesterdayRespBody)
+		n += copy(data[n:], rosesShortRespBody)
+		n += copy(data[n:], yesterdayShortRespBody)
+	}
+	return
+}

@@ -19,30 +19,30 @@
 package client_test
 
 // To test with default settings,
-// launch a Stanford CoreNLP 4.5.3 or 4.5.4 server
+// launch a Stanford CoreNLP 4.5.5 server
 // (both the main server and the status server) listening on 127.0.0.1:9000.
 // Set the server ID (i.e., server name) to testdefault.
 // The server should use its default language model.
 //
 // To test with different status port settings,
-// launch a Stanford CoreNLP 4.5.3 or 4.5.4 server,
+// launch a Stanford CoreNLP 4.5.5 server,
 // with its main server listening on 127.0.0.1:9100 and
 // its status server listening on 127.0.0.1:9101.
 // Set the server ID (i.e., server name) to testdiffstatus.
 // The server should use its default language model.
 //
 // To test with basic auth settings,
-// launch a Stanford CoreNLP 4.5.3 or 4.5.4 server
+// launch a Stanford CoreNLP 4.5.5 server
 // (both the main server and the status server) listening on 127.0.0.1:9200,
 // with username="user1" and password="u1%passWORD".
 // Set the server ID (i.e., server name) to testuser.
 // The server should use its default language model.
 //
 // To test the shutdown functionality,
-// launch a Stanford CoreNLP 4.5.3 or 4.5.4 server
+// launch a Stanford CoreNLP 4.5.5 server
 // (both the main server and the status server) listening on 127.0.0.1:9300,
 // without setting its server ID,
-// and launch a Stanford CoreNLP 4.5.3 or 4.5.4 server
+// and launch a Stanford CoreNLP 4.5.5 server
 // (both the main server and the status server) listening on 127.0.0.1:9301,
 // with server ID testshutdown.
 
@@ -58,7 +58,7 @@ import (
 	"github.com/donyori/gocorenlp/client"
 	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.5.3-5250f9faf9f1/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
 )
 
 const (
@@ -381,7 +381,7 @@ func NewClientForTest(tb testing.TB, index int) client.Client {
 		tb.Fatalf(InvalidIndexLayout, index, NumIndex)
 	}
 	opts.Annotators = "tokenize,ssplit,pos"
-	opts.Timeout = time.Millisecond * 600
+	opts.ClientTimeout = time.Millisecond * 600
 	return client.NewClientWithoutCheckingLive(opts)
 }
 

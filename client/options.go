@@ -44,14 +44,18 @@ type Options struct {
 	// Default: 0
 	StatusPort uint16 `json:"statusPort,omitempty"`
 
-	// Timeout specifies a time limit for requests made by the client.
+	// ClientTimeout specifies a time limit for requests made by the client.
 	// The timeout includes connection time, any redirects,
 	// and reading the response body.
+	//
+	// Note that it does not affect the time limit of
+	// the Stanford CoreNLP server to wait for an annotation
+	// to finish before canceling it.
 	//
 	// A non-positive value means no timeout.
 	//
 	// Default: 0
-	Timeout time.Duration `json:"timeout,omitempty"`
+	ClientTimeout time.Duration `json:"clientTimeout,omitempty"`
 
 	// Username is the username sent with the request.
 	// Set this along with Password if the target server requires basic auth.
