@@ -249,10 +249,10 @@ defer f.Close()
 // Create a ResponseBodyDecoder on it.
 dec := model.NewResponseBodyDecoder(f)
 
+var doc pb.Document // specify your document model
 // Decode the annotation results until EOF.
 for {
-	doc := new(pb.Document) // specify your document model
-	err := dec.Decode(doc)
+	err := dec.Decode(&doc)
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			break

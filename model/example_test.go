@@ -209,15 +209,14 @@ AHgAgAEA
 	// Create a ResponseBodyDecoder on it.
 	dec := model.NewResponseBodyDecoder(input)
 
+	// Specify the document model.
+	// Depending on your CoreNLP version, use the appropriate model.
+	// See the documentation for this package for details.
+	var doc pb.Document
 	// Decode the annotation results until EOF.
 	for {
-		// Specify the document model.
-		// Depending on your CoreNLP version, use the appropriate model.
-		// See the documentation for this package for details.
-		doc := new(pb.Document)
-
 		// Decode the response body and place the result in doc.
-		err = dec.Decode(doc)
+		err = dec.Decode(&doc)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				break
