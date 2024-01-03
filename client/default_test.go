@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -73,7 +73,8 @@ func TestAnnotate(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
 	AnnotateFunc(t, func(annotators string) *pb.Document {
 		doc := new(pb.Document)
-		if err := client.Annotate(strings.NewReader(Text), annotators, doc); err != nil {
+		err := client.Annotate(strings.NewReader(Text), annotators, doc)
+		if err != nil {
 			t.Error(err)
 			return nil
 		}
@@ -85,7 +86,8 @@ func TestAnnotateString(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
 	AnnotateFunc(t, func(annotators string) *pb.Document {
 		doc := new(pb.Document)
-		if err := client.AnnotateString(Text, annotators, doc); err != nil {
+		err := client.AnnotateString(Text, annotators, doc)
+		if err != nil {
 			t.Error(err)
 			return nil
 		}
@@ -97,7 +99,8 @@ func TestAnnotateRaw(t *testing.T) {
 	SkipIfDefaultServerOffline(t)
 	AnnotateFunc(t, func(annotators string) *pb.Document {
 		var b bytes.Buffer
-		written, err := client.AnnotateRaw(strings.NewReader(Text), annotators, &b)
+		written, err := client.AnnotateRaw(
+			strings.NewReader(Text), annotators, &b)
 		if err != nil {
 			t.Error(err)
 			return nil
@@ -107,7 +110,8 @@ func TestAnnotateRaw(t *testing.T) {
 			return nil
 		}
 		doc := new(pb.Document)
-		if err = model.DecodeResponseBody(b.Bytes(), doc); err != nil {
+		err = model.DecodeResponseBody(b.Bytes(), doc)
+		if err != nil {
 			t.Error(err)
 			return nil
 		}
@@ -129,7 +133,8 @@ func TestAnnotateStringRaw(t *testing.T) {
 			return nil
 		}
 		doc := new(pb.Document)
-		if err = model.DecodeResponseBody(b.Bytes(), doc); err != nil {
+		err = model.DecodeResponseBody(b.Bytes(), doc)
+		if err != nil {
 			t.Error(err)
 			return nil
 		}
@@ -140,7 +145,8 @@ func TestAnnotateStringRaw(t *testing.T) {
 func TestShutdown(t *testing.T) {
 	ParseFlag()
 	if !RunShutdownTest {
-		t.Skip("skip this test because flag -" + FlagNameTestFuncShutdown + " is not set")
+		t.Skip("skip this test because flag -" + FlagNameTestFuncShutdown +
+			" is not set")
 	}
 	SkipIfDefaultServerOffline(t)
 	if err := client.Shutdown(); err != nil {

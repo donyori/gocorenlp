@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -237,7 +237,10 @@ func (c *clientImpl) Live() error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	_, _, err = checkResponse(resp, nil, nil, "live")
+	defer func(c io.Closer) {
+		_ = c.Close() // ignore error
+	}(resp.Body)
+	err = checkResponse(resp, "live")
 	return gogoerrors.AutoWrap(err)
 }
 
@@ -252,7 +255,10 @@ func (c *clientImpl) Ready() error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	_, _, err = checkResponse(resp, nil, nil, "ready")
+	defer func(c io.Closer) {
+		_ = c.Close() // ignore error
+	}(resp.Body)
+	err = checkResponse(resp, "ready")
 	return gogoerrors.AutoWrap(err)
 }
 
@@ -319,19 +325,15 @@ func (c *clientImpl) AnnotateRaw(
 	if err != nil {
 		return 0, gogoerrors.AutoWrap(err)
 	}
-	_, _, err = checkResponse(resp, nil, nil, "")
+	defer func(c io.Closer) {
+		_ = c.Close() // ignore error
+	}(resp.Body)
+	err = checkResponse(resp, "")
 	if err != nil {
 		return 0, gogoerrors.AutoWrap(err)
 	}
-	// The return value read of checkResponse must be false
-	// as its acceptBody is nil, wantBody is empty, and it reports no error
-	// (i.e., the response status is acceptable).
-	defer closeIgnoreError(resp.Body)
 	written, err = io.Copy(output, resp.Body)
-	if err != nil {
-		err = gogoerrors.AutoWrap(err)
-	}
-	return
+	return written, gogoerrors.AutoWrap(err)
 }
 
 func (c *clientImpl) AnnotateStringRaw(
@@ -355,8 +357,10 @@ func (c *clientImpl) Shutdown(key string) error {
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
 	}
-	wantBody := "Shutdown successful!"
-	_, _, err = checkResponse(resp, nil, nil, wantBody)
+	defer func(c io.Closer) {
+		_ = c.Close() // ignore error
+	}(resp.Body)
+	err = checkResponse(resp, "Shutdown successful!")
 	return gogoerrors.AutoWrap(err)
 }
 
@@ -378,79 +382,37 @@ func (c *clientImpl) private() {}
 
 // checkResponse checks the status and body of the specified HTTP response.
 //
-// acceptStatus is a function to check the response status.
-// Its two arguments are resp.StatusCode and resp.Status.
-// It returns a boolean value indicating whether the status is acceptable.
-// If it is nil, checkResponse accepts the status if the status code is 2XX.
-//
-// acceptBody is a function to check the response body.
-// Its argument is the response body.
-// It returns a boolean value indicating whether the body is acceptable.
-// If it is nil and wantBody is not empty,
-// checkResponse accepts the body if the body and wantBody are the same
-// after dropping leading and trailing white space.
-//
 // wantBody is the expected body of the response.
-// It is stored in the returned error
-// if the response body is unacceptable.
+// If wantBody is not empty, checkResponse reads the response body
+// and compares it with wantBody, but does not close the response body reader.
+// Otherwise, checkResponse does nothing to the response body reader,
+// neither reading nor closing it.
 //
-// If acceptBody is non-nil or wantBody is non-empty,
-// or the status is unacceptable, checkResponse reads the response body
-// and closes the body reader; otherwise, checkResponse does nothing to
-// the body reader, neither reading nor closing it.
-//
-// checkResponse returns the response body (nil if not read it)
-// and an indicator read to report whether it has attempted to
-// read the response body.
-// If read is true, the body reader is closed by checkResponse.
-// It reports an error if the response is not as expected.
+// checkResponse reports an error if the status code is not 2XX,
+// or the expected body is not empty and the response body is different from
+// the expected (leading and trailing whitespace characters are ignored).
 // If the returned error is non-nil, it is of type
 // *github.com/donyori/gocorenlp/errors.UnacceptableResponseError.
-func checkResponse(
-	resp *http.Response,
-	acceptStatus func(statusCode int, status string) bool,
-	acceptBody func(body []byte) bool,
-	wantBody string,
-) (body []byte, read bool, err error) {
-	if acceptStatus == nil {
-		acceptStatus = func(statusCode int, _ string) bool {
-			return statusCode >= 200 && statusCode < 300
-		}
-	}
-	if acceptBody == nil && len(wantBody) > 0 {
-		acceptBody = func(body []byte) bool {
-			return strings.TrimSpace(string(body)) == strings.TrimSpace(wantBody)
-		}
-	}
+func checkResponse(resp *http.Response, wantBody string) error {
+	var err error
 	respErr := new(errors.UnacceptableResponseError)
-	statusCode, status := resp.StatusCode, resp.Status
-	if !acceptStatus(statusCode, status) {
-		respErr.StatusCode, respErr.Status = statusCode, status
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respErr.StatusCode, respErr.Status = resp.StatusCode, resp.Status
 		err = respErr
-	} else if acceptBody == nil {
-		return
 	}
-	defer closeIgnoreError(resp.Body)
-	read = true
+	if wantBody == "" {
+		return gogoerrors.AutoWrap(err)
+	}
+	var body []byte
 	body, respErr.ReadError = io.ReadAll(resp.Body)
 	if len(body) > 0 {
 		respErr.Body = string(body)
 	}
 	if respErr.ReadError != nil {
 		err = respErr
-		return
-	}
-	if acceptBody != nil && !acceptBody(body) {
-		err = respErr
+	} else if string(bytes.TrimSpace(body)) != strings.TrimSpace(wantBody) {
 		respErr.WantBody = wantBody
+		err = respErr
 	}
-	return
-}
-
-// closeIgnoreError closes the specified closer if it is non-nil
-// and ignores any error encountered.
-func closeIgnoreError(closer io.Closer) {
-	if closer != nil {
-		_ = closer.Close()
-	}
+	return gogoerrors.AutoWrap(err)
 }

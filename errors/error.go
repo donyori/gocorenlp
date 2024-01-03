@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -72,8 +72,7 @@ type UnacceptableResponseError struct {
 	Body       string // Body is the body of the response.
 
 	// WantBody is the expected body of the response,
-	// set only if the response status is acceptable and
-	// no error occurs when reading the response body.
+	// set only if no error occurs when reading the response body.
 	WantBody string
 }
 
@@ -83,7 +82,8 @@ func (e *UnacceptableResponseError) Error() string {
 	}
 	body, wantBody := shortenN(e.Body, 40), shortenN(e.WantBody, 40)
 	var b strings.Builder
-	if e.StatusCode != 0 || len(e.Status) > 0 {
+	switch {
+	case e.StatusCode != 0, len(e.Status) > 0:
 		if len(e.Status) > 0 {
 			b.WriteString("got response status ")
 			b.WriteString(e.Status)
@@ -98,17 +98,17 @@ func (e *UnacceptableResponseError) Error() string {
 			b.WriteString("; body ")
 			b.WriteString(strconv.Quote(body))
 		}
-	} else if e.ReadError != nil {
+	case e.ReadError != nil:
 		b.WriteString("error reading body: ")
 		b.WriteString(e.ReadError.Error())
-	} else if len(body) > 0 {
+	case len(body) > 0:
 		b.WriteString("got response body ")
 		b.WriteString(strconv.Quote(body))
 		if len(wantBody) > 0 {
 			b.WriteString("; want ")
 			b.WriteString(strconv.Quote(wantBody))
 		}
-	} else if len(wantBody) > 0 {
+	case len(wantBody) > 0:
 		b.WriteString("got no response body; want ")
 		b.WriteString(strconv.Quote(wantBody))
 	}
@@ -146,13 +146,15 @@ func NewProtoBufError(Op string, v any, err error) *ProtoBufError {
 	typeName := "<nil>"
 	if v != nil {
 		value := reflect.ValueOf(v)
-		for k := value.Kind(); (k == reflect.Interface || k == reflect.Pointer) && !value.IsNil(); k = value.Kind() {
+		for k := value.Kind(); (k == reflect.Interface ||
+			k == reflect.Pointer) &&
+			!value.IsNil(); k = value.Kind() {
 			value = value.Elem()
 		}
 		t := value.Type()
-		pkg := t.PkgPath()
-		name := t.Name()
-		if len(pkg) > 0 {
+		pkg, name := t.PkgPath(), t.Name()
+		switch {
+		case len(pkg) > 0:
 			if len(name) > 0 {
 				typeName = pkg + "." + name
 			} else {
@@ -177,10 +179,10 @@ func NewProtoBufError(Op string, v any, err error) *ProtoBufError {
 					typeName = pkg + "." + name
 				}
 			}
-		} else if len(name) > 0 {
+		case len(name) > 0:
 			// This case may not happen.
 			typeName = name
-		} else {
+		default:
 			typeName = t.String()
 		}
 		if len(typeName) == 0 {

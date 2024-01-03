@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -82,16 +82,14 @@ func (rbd *responseBodyDecoder) Decode(msg proto.Message) error {
 	if msg == nil {
 		return gogoerrors.AutoNew("the provided message is nil")
 	}
-	buf := decoderBufferPool.Get().([]byte)
+	bufPtr := decoderBufferPool.Get().(*[]byte)
 	defer func() {
-		// The buffer put to the pool may be different from
-		// that gotten from the pool.
-		decoderBufferPool.Put(buf)
+		decoderBufferPool.Put(bufPtr)
 	}()
 	// Read and parse the prefixed length:
 	const MaxVarintLen int = 10
-	if len(buf) < MaxVarintLen {
-		buf = make([]byte, MaxVarintLen)
+	if cap(*bufPtr) < MaxVarintLen {
+		*bufPtr = make([]byte, cap(*bufPtr)*2+MaxVarintLen)
 	}
 	var n int
 	c := byte(0x80)
@@ -101,9 +99,9 @@ func (rbd *responseBodyDecoder) Decode(msg proto.Message) error {
 		if err != nil && (n == 0 || !errors.Is(err, io.EOF)) {
 			return gogoerrors.AutoWrap(err)
 		}
-		buf[n], n = c, n+1
+		(*bufPtr)[n], n = c, n+1
 	}
-	t := buf[:n]
+	t := (*bufPtr)[:n]
 	size, n := protowire.ConsumeVarint(t)
 	if n < 0 {
 		return gogoerrors.AutoWrap(errors.NewProtoBufError(
@@ -113,10 +111,10 @@ func (rbd *responseBodyDecoder) Decode(msg proto.Message) error {
 		))
 	}
 	// Read and parse the message body:
-	if uint64(len(buf)) < size {
-		buf = make([]byte, size)
+	if uint64(cap(*bufPtr)) < size {
+		*bufPtr = make([]byte, uint64(cap(*bufPtr))*2+size)
 	}
-	t = buf[:size]
+	t = (*bufPtr)[:size]
 	_, err = io.ReadFull(rbd.r, t)
 	if err != nil {
 		return gogoerrors.AutoWrap(err)
@@ -138,7 +136,7 @@ func (rbd *responseBodyDecoder) private() {}
 // to load ProtoBuf data from readers.
 var decoderBufferPool = sync.Pool{
 	New: func() any {
-		return []byte(nil)
+		return new([]byte)
 	},
 }
 

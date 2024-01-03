@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -118,8 +118,8 @@ func CheckRosesAreRedDocument(doc Document) (err error) {
 		checkRosesAreRedSentenceSlice(reflect.ValueOf(doc)))
 }
 
-// DecodeBase64ToPb decodes the standard base64 (as defined in RFC 4648) encoded CoreNLP server
-// response body into a ProtoBuf message.
+// DecodeBase64ToPb decodes the standard base64 (as defined in RFC 4648)
+// encoded CoreNLP server response body into a ProtoBuf message.
 func DecodeBase64ToPb(base64String string, msg proto.Message) error {
 	b, err := base64.StdEncoding.DecodeString(base64String)
 	if err != nil {
@@ -186,7 +186,10 @@ func checkRosesAreRedSentenceSlice(docV reflect.Value) error {
 
 // checkRosesAreRedTokensOfSentence is a sub procedure of
 // the function checkRosesAreRedSentenceSlice.
-func checkRosesAreRedTokensOfSentence(sentSliceV reflect.Value, sentIdx int) error {
+func checkRosesAreRedTokensOfSentence(
+	sentSliceV reflect.Value,
+	sentIdx int,
+) error {
 	sentV := sentSliceV.Index(sentIdx)
 	// The type of sentV has already been examined.
 	m := sentV.MethodByName("GetToken")

@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -166,7 +166,8 @@ func TestDecodeResponseBody_Truncated(t *testing.T) {
 	err = model.DecodeResponseBody(b, doc)
 	if !errors.IsProtoBufError(err) ||
 		!errors.Is(err, io.ErrUnexpectedEOF) {
-		t.Errorf("got %v; want a *ProtoBufError wrapping io.ErrUnexpectedEOF", err)
+		t.Errorf("got %v; want a *ProtoBufError wrapping io.ErrUnexpectedEOF",
+			err)
 	}
 }
 
@@ -247,7 +248,8 @@ func TestConsumeResponseBody_Truncated(t *testing.T) {
 	}
 	if !errors.IsProtoBufError(err) ||
 		!errors.Is(err, io.ErrUnexpectedEOF) {
-		t.Errorf("got %v; want a *ProtoBufError wrapping io.ErrUnexpectedEOF", err)
+		t.Errorf("got %v; want a *ProtoBufError wrapping io.ErrUnexpectedEOF",
+			err)
 	}
 }
 

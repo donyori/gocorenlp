@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -101,6 +101,8 @@ type Options struct {
 	// will not violate compatibility.
 	onlyKeyedLiterals struct{}
 }
+
+var _ = Options{}.onlyKeyedLiterals // to suppress "field `onlyKeyedLiterals` is unused (unused)"
 
 // GetHosts returns the hosts (including the hostname part and
 // the port number part) for the main server and status server.

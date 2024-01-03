@@ -1,5 +1,5 @@
 // gocorenlp.  A Go (Golang) client for Stanford CoreNLP server.
-// Copyright (C) 2022-2023  Yuan Gao
+// Copyright (C) 2022-2024  Yuan Gao
 //
 // This file is part of gocorenlp.
 //
@@ -162,7 +162,7 @@ func TestNewProtoBufError(t *testing.T) {
 		{"byte slice", []byte{}, "[]uint8"},
 		{"proto.Message", msg, docType},
 		{"*proto.Message", &msg, docType},
-		{"pb.Document", *docPtr, docType},
+		{"pb.Document", pb.Document{}, docType},
 		{"*pb.Document", docPtr, docType},
 		{"anonymous struct", st, anonymousStructType},
 		{"*anonymous struct", &st, anonymousStructType},
@@ -170,21 +170,24 @@ func TestNewProtoBufError(t *testing.T) {
 	for _, op := range []string{"client.testOp1", "test_op2"} {
 		for _, tw := range typeWantCases {
 			for _, ue := range []error{nil, underlyingErr} {
-				t.Run(fmt.Sprintf("op=%s&v type=%s&err=%v", op, tw.showName, ue), func(t *testing.T) {
-					pe := errors.NewProtoBufError(op, tw.v, ue)
-					if pe == nil {
-						t.Fatal("got nil")
-					}
-					if pe.Op != op {
-						t.Errorf("got op %s; want %s", pe.Op, op)
-					}
-					if pe.Type != tw.want {
-						t.Errorf("got type %s; want %s", pe.Type, tw.want)
-					}
-					if pe.Err != ue {
-						t.Errorf("got err %v; want %v", pe.Err, ue)
-					}
-				})
+				t.Run(
+					fmt.Sprintf("op=%s&v type=%s&err=%v", op, tw.showName, ue),
+					func(t *testing.T) {
+						pe := errors.NewProtoBufError(op, tw.v, ue)
+						if pe == nil {
+							t.Fatal("got nil")
+						}
+						if pe.Op != op {
+							t.Errorf("got op %s; want %s", pe.Op, op)
+						}
+						if pe.Type != tw.want {
+							t.Errorf("got type %s; want %s", pe.Type, tw.want)
+						}
+						if pe.Err != ue {
+							t.Errorf("got err %v; want %v", pe.Err, ue)
+						}
+					},
+				)
 			}
 		}
 	}
@@ -210,7 +213,11 @@ type IsErrorTestCase struct {
 
 // IsErrorFunc tests the specified IsXxxError function f
 // with the specified test cases.
-func IsErrorFunc(t *testing.T, f func(err error) bool, testCases []IsErrorTestCase) {
+func IsErrorFunc(
+	t *testing.T,
+	f func(err error) bool,
+	testCases []IsErrorTestCase,
+) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("error=%v", tc.err), func(t *testing.T) {
 			if r := f(tc.err); r != tc.want {
