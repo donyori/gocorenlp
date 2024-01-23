@@ -180,7 +180,7 @@ func Example_cacheAnnotation() {
 	defer func(f *os.File) {
 		// This error handler can usually be omitted.
 		if err := f.Close(); err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err) // ignore error
 		}
 	}(f)
 

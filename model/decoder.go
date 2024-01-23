@@ -83,9 +83,7 @@ func (rbd *responseBodyDecoder) Decode(msg proto.Message) error {
 		return gogoerrors.AutoNew("the provided message is nil")
 	}
 	bufPtr := decoderBufferPool.Get().(*[]byte)
-	defer func() {
-		decoderBufferPool.Put(bufPtr)
-	}()
+	defer decoderBufferPool.Put(bufPtr)
 	// Read and parse the prefixed length:
 	const MaxVarintLen int = 10
 	if cap(*bufPtr) < MaxVarintLen {
