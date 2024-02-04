@@ -58,7 +58,7 @@ import (
 	"fmt"
 
 	"github.com/donyori/gocorenlp/client"
-	"github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.6-eb50467fa8e3/pb"
 )
 
 func main() {
@@ -275,7 +275,7 @@ Our client asks the CoreNLP server to serialize the results in
 [Protocol Buffers (ProtoBuf)](https://protobuf.dev/ "Protocol Buffers").
 
 At the current stage, we provide the models supporting CoreNLP 3.6.0,
-and 4.0.0 to 4.5.5.
+and 4.0.0 to 4.5.6.
 These models are organized into subpackages of `model` named in the form
 
 > github.com/donyori/gocorenlp/model/vX.Y.Z-abcdefabcdef/pb
@@ -309,6 +309,7 @@ models and CoreNLP versions:
 | model/v4.5.2-9c3dfee5af50/pb | 4.5.2               |
 | model/v4.5.3-5250f9faf9f1/pb | 4.5.3, 4.5.4        |
 | model/v4.5.5-f1b929e47a57/pb | 4.5.5               |
+| model/v4.5.6-eb50467fa8e3/pb | 4.5.6               |
 
 *(CoreNLP 4.2.1 and 4.2.2 use exactly the identical ProtoBuf model,
 as do 4.3.0, 4.3.1, 4.3.2, and 4.5.0, 4.5.1, and 4.5.3, 4.5.4.)*

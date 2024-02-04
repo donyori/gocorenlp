@@ -28,7 +28,7 @@ import (
 	"github.com/donyori/gocorenlp/client"
 	"github.com/donyori/gocorenlp/errors"
 	"github.com/donyori/gocorenlp/model"
-	"github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
+	"github.com/donyori/gocorenlp/model/v4.5.6-eb50467fa8e3/pb"
 )
 
 const DefaultPort uint16 = 9000

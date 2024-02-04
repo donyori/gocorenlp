@@ -74,7 +74,7 @@ func Ready() error {
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
 //
-//	import "github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
+//	import "github.com/donyori/gocorenlp/model/v4.5.6-eb50467fa8e3/pb"
 //	...
 //	outDoc := new(pb.Document)
 //	err := Annotate(input, "tokenize,ssplit,pos", outDoc)
@@ -107,7 +107,7 @@ func Annotate(input io.Reader, annotators string, outDoc proto.Message) error {
 // outDoc must be a non-nil pointer to an auto-generated Document
 // structure, for example:
 //
-//	import "github.com/donyori/gocorenlp/model/v4.5.5-f1b929e47a57/pb"
+//	import "github.com/donyori/gocorenlp/model/v4.5.6-eb50467fa8e3/pb"
 //	...
 //	outDoc := new(pb.Document)
 //	err := AnnotateString("Hello world!", "tokenize,ssplit,pos", outDoc)
