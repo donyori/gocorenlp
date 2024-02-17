@@ -295,7 +295,7 @@ func TestConsumeResponseBody_DifferentResponses(t *testing.T) {
 	}
 
 	p := data[:]
-	for i := 0; i < NumRepeat; i++ {
+	for i := range NumRepeat {
 		doc := new(pb.Document)
 		n, err := model.ConsumeResponseBody(p, doc)
 		if err != nil {
@@ -700,7 +700,7 @@ func MakeDifferentResponsesData(numRepeat int) (
 	}
 	data = make([]byte, (lens[0]+lens[1]+lens[2]+lens[3])*numRepeat)
 	var n int
-	for i := 0; i < numRepeat; i++ {
+	for range numRepeat {
 		n += copy(data[n:], rosesRespBody)
 		n += copy(data[n:], yesterdayRespBody)
 		n += copy(data[n:], rosesShortRespBody)

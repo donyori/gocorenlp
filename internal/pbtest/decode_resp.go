@@ -176,7 +176,7 @@ func checkRosesAreRedSentenceSlice(docV reflect.Value) error {
 			NumRosesAreRedSentence,
 		))
 	}
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if err := checkRosesAreRedTokensOfSentence(sentSliceV, i); err != nil {
 			return gogoerrors.AutoWrap(err)
 		}
@@ -231,7 +231,7 @@ func checkRosesAreRedTokensOfSentence(
 			NumRosesAreRedSentenceTokenList[sentIdx],
 		))
 	}
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if err := checkRosesAreRedToken(tokenSliceV, sentIdx, i); err != nil {
 			return gogoerrors.AutoWrap(err)
 		}

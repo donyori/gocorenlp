@@ -65,7 +65,7 @@ func TestResponseBodyDecoder_TwoResponses(t *testing.T) {
 	if dec == nil {
 		t.Fatal("got nil decoder")
 	}
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		doc := new(pb.Document)
 		err = dec.Decode(doc)
 		if err != nil {
@@ -93,7 +93,7 @@ func TestResponseBodyDecoder_DifferentResponses(t *testing.T) {
 	if dec == nil {
 		t.Fatal("got nil decoder")
 	}
-	for i := 0; i < NumRepeat; i++ {
+	for i := range NumRepeat {
 		doc := new(pb.Document)
 		err = dec.Decode(doc)
 		if err != nil {
