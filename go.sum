@@ -1,5 +1,5 @@
-github.com/donyori/gogo v0.12.1 h1:SaFTYwlPvoOruXNz14MSUgqsADkUJHq+kJl2SlNb7Hw=
-github.com/donyori/gogo v0.12.1/go.mod h1:Vg8XsIwDNzBx9i8ldC1ouQjtZRmiQa0jIJnuQVEZAM4=
+github.com/donyori/gogo v0.12.2 h1:onW1+mDW5r+NNWBonTiYiFzoMVgFA+PoMcDnq6WTj3I=
+github.com/donyori/gogo v0.12.2/go.mod h1:cnCxj2QgMioUH073VrIvD9LAPELB2CjrDgKfzk5F64M=
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=
